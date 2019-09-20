@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package>
+  <name>blmc_controllers</name>
+  <version>1.0.0</version>
+  <description>This packages contains all controllers for the quadruped, hopper and anyother BLMC robot that is fabricated in the future</description>
+  <author email="am9789@nyu.edu">Avadesh Meduri</author>
+  <maintainer email="am9789@nyu.edu">Avadesh Meduri</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <export>
+  </export>
+</package>
