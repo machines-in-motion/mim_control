@@ -13,9 +13,15 @@ import os
 import rospkg
 import pybullet as p
 import pinocchio as se3
+from pinocchio.utils import se3ToXYZQUAT
 
 from robot_properties_solo.config import Solo12Config
 from robot_properties_solo.quadruped12wrapper import Quadruped12Robot
+
+from py_impedance_control.solo_impedance_controller import solo_impedance_controller 
+
+from pinocchio.utils import zero
+from matplotlib import pyplot as plt
 
 
 # Create a robot instance. This initializes the simulator as well.
@@ -27,20 +33,38 @@ q0 = np.matrix(Solo12Config.initial_configuration).T
 dq0 = np.matrix(Solo12Config.initial_velocity).T
 robot.reset_state(q0, dq0)
 
+###################### impedance controller demo #################################
+
+x_des = 4*[0.0, 0.0, -0.22]
+xd_des = 4*[0,0,0] 
+kp = 4 * [10,10,10]
+kd = np.zeros(18)
+f = np.zeros(18)
+f = 4*[0.0, 0.0, -1.0]
+##################################################################################
+
+solo_leg_ctrl = solo_impedance_controller(robot)
+x = []
+xd = []
 
 # Run the simulator for 100 steps
-for i in range(230):
-    # TODO: Implement a controller here.
-    robot.send_joint_command(tau)
-    
+for i in range(400):
+    # TODO: Implement a controller here.    
     # Step the simulator.
     p.stepSimulation()
-    # time.sleep(0.001) # You can sleep here if you want to slow down the replay
+    time.sleep(0.001) # You can sleep here if you want to slow down the replay
+    # Read the final state and forces after the stepping.
+    q, dq = robot.get_state()
+    x.append(solo_leg_ctrl.FL_imp.compute_distance_between_frames(q))
+    xd.append(solo_leg_ctrl.FL_imp.compute_relative_velocity_between_frames(q,dq))
 
-# Read the final state and forces after the stepping.
-q, dq = robot.get_state()
-active_eff, forces = robot.get_force()
-print('q', q)
-print('dq', dq)
-print('active eff', active_eff)
-print('forces', forces)
+    # tau = solo_leg_ctrl.return_joint_torques(q,dq,kp,kd,x_des,xd_des,f)
+    # tau = np.matrix(12*[1,]).T    
+    robot.send_joint_command(tau)
+
+x = np.array(x)
+xd = np.array(xd)
+plt.plot(xd[:,2], label = "velocity")
+plt.plot(x[:,2], label = "position")
+plt.legend()
+plt.show()
