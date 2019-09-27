@@ -35,36 +35,23 @@ robot.reset_state(q0, dq0)
 
 ###################### impedance controller demo #################################
 
-x_des = 4*[0.0, 0.0, -0.22]
+x_des = 4*[0.0, 0.0, -0.25]
 xd_des = 4*[0,0,0] 
-kp = 4 * [10,10,10]
-kd = np.zeros(18)
+kp = 4 * [200,200,200]
+kd = 4 * [10.0,10.0,10.0]
 f = np.zeros(18)
-f = 4*[0.0, 0.0, -1.0]
+f = 4*[0.0, 0.0, (2.2*9.8)/4]
 ##################################################################################
 
 solo_leg_ctrl = solo_impedance_controller(robot)
-x = []
-xd = []
 
 # Run the simulator for 100 steps
-for i in range(400):
+for i in range(4000):
     # TODO: Implement a controller here.    
     # Step the simulator.
     p.stepSimulation()
     time.sleep(0.001) # You can sleep here if you want to slow down the replay
     # Read the final state and forces after the stepping.
     q, dq = robot.get_state()
-    x.append(solo_leg_ctrl.FL_imp.compute_distance_between_frames(q))
-    xd.append(solo_leg_ctrl.FL_imp.compute_relative_velocity_between_frames(q,dq))
-
-    # tau = solo_leg_ctrl.return_joint_torques(q,dq,kp,kd,x_des,xd_des,f)
-    # tau = np.matrix(12*[1,]).T    
+    tau = solo_leg_ctrl.return_joint_torques(q,dq,kp,kd,x_des,xd_des,f)
     robot.send_joint_command(tau)
-
-x = np.array(x)
-xd = np.array(xd)
-plt.plot(xd[:,2], label = "velocity")
-plt.plot(x[:,2], label = "position")
-plt.legend()
-plt.show()

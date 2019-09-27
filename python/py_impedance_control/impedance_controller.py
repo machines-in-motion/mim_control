@@ -10,7 +10,7 @@
 
 import numpy as np
 import pinocchio as pin
-from pinocchio.utils import zero
+from pinocchio.utils import zero,eye
 
 
 class impedance_controller():
@@ -20,8 +20,7 @@ class impedance_controller():
         '''
         Input : 
             name : Name of the impdeance controller (Ex. Front left leg impedance)
-            pifrom pinocchio
-n_robot : pinocchio wrapper instance.
+            pinocchio_robot : pinocchio wrapper instance.
             frame_root_name : The root frame name where the spring starts(Ex. Hip)
             frame_end_name : the second frame name where the spring ends(Ex. end effector)
             start_column : the column from where 3 columns from the jacobian are selected
@@ -47,52 +46,38 @@ n_robot : pinocchio wrapper instance.
         '''
             Computes the distance between the two frames or computes the location 
             of frame_end with respect to frame_root
-        '''
-        self.compute_forward_kinematics(q)
-        
-        return (pin.SE3(self.pin_robot.data.oMf[self.frame_root_idx].inverse()) * \
-                                                    (pin.SE3(self.pin_robot.data.oMf[self.frame_end_idx]))).translation
-        # return pin.SE3(self.pin_robot.data.oMf[self.frame_root_idx]).translation - pin.SE3(self.pin_robot.data.oMf[self.frame_end_idx]).translation
+        '''        
+        return self.pin_robot.data.oMf[self.frame_end_idx].translation - self.pin_robot.data.oMf[self.frame_root_idx].translation
                                                     
     def compute_relative_velocity_between_frames(self,q,dq):
         '''
-            computes the velocity of the end_frame with respect to the root frame
+            computes the velocity of the end_frame with respect to a frame
+            whose origin aligns with the root frame but is oriented as the world frame
         '''
-        self.compute_forward_kinematics(q)
 
-        T_hip_foot = pin.SE3(self.pin_robot.data.oMf[self.frame_root_idx].inverse()) * \
-                                                    (pin.SE3(self.pin_robot.data.oMf[self.frame_end_idx]))
-        
-        jac = T_hip_foot.action * pin.frameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_end_idx)
-        
-        return np.matmul(jac,dq)[0:3]
+        frame_config_root = pin.SE3(self.pin_robot.data.oMf[self.frame_root_idx].rotation, np.zeros((3,1)))
+        frame_config_end = pin.SE3(self.pin_robot.data.oMf[self.frame_end_idx].rotation, np.zeros((3,1)))
+
+        vel_root_in_world_frame = (frame_config_root.action * pin.frameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_root_idx)).dot(dq)[0:3]
+        vel_end_in_world_frame = (frame_config_end.action * pin.frameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_end_idx)).dot(dq)[0:3]
+
+        return vel_end_in_world_frame - vel_root_in_world_frame
         
     def compute_jacobian(self,q):
         '''
-            computes the jacobian with respect to the root_frame for the end_effector frame
-            Math : J = Adj_(HFE, Foot) * J_(Foot frame)
-            Selection of the required portion of the jacobian 
+            computes the jacobian in the world frame 
+            Math : J = R(World,Foot) * J_(Foot frame)
+            Selection of the required portion of the jacobian is also done here 
         '''
-        
-        T_hip_foot = pin.SE3(self.pin_robot.data.oMf[self.frame_root_idx]).inverse() * \
-                                                    pin.SE3(self.pin_robot.data.oMf[self.frame_end_idx])
-        
-        ### SE3 matrix that maps point in the end_frame to the root_frame
-        
-        return np.matmul((T_hip_foot.action), pin.frameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_end_idx))
-     
-     
-    def jacobian_selector(self, jac):
-        '''
-            select the part of the jacobian neccessary to compute the force 
-        '''    
-        
-        return jac[:,self.start_column:self.start_column+3][0:3]
-        
+        self.compute_forward_kinematics(q)
+        jac = pin.frameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_end_idx)
+        jac = jac[:,self.start_column:self.start_column+3][0:3]
+        jac = self.pin_robot.data.oMf[self.frame_end_idx].rotation.dot(jac)
+        return jac
         
     def compute_impedance_torques(self, q, dq, kp, kd, x_des, xd_des, f):
         '''
-            Computes the desired joint torques tau = Jt * (F + kp(x-x_des) + kd(xd-xd_des))
+            Computes the desired joint torques tau = -Jt * (F + kp(x-x_des) + kd(xd-xd_des))
             Inputs:
                 q = joint angles
                 dq = joint velocites
@@ -102,9 +87,11 @@ n_robot : pinocchio wrapper instance.
                 xd_des = desired velocity of end effector at time t (in the root joint frame)
                 
         '''
-
-        ### Write the assert statements here 
-
+        assert (np.shape(x_des) == (3,))
+        assert (np.shape(xd_des) == (3,))
+        assert (np.shape(f) == (3,))
+        assert (np.shape(kp) == (3,))
+        assert (np.shape(kd) == (3,))
 
         #### Reshaping values to desired shapes
         
@@ -124,14 +111,10 @@ n_robot : pinocchio wrapper instance.
         self.compute_forward_kinematics(q)
         x = self.compute_distance_between_frames(q)
         xd = self.compute_relative_velocity_between_frames(q,dq)
-        # print(xd[2])  
-
-                                                    
+                                                            
         jac = self.compute_jacobian(q)
-        jac_sel = self.jacobian_selector(jac)
-        # tau = jac_sel.T * (f + kp*(x - x_des))
-        tau = np.matmul(jac_sel.T ,(kp*(x - x_des)))
-
+        tau = -1*jac.T.dot(f + kp*(x - x_des) + kd*(xd - xd_des))
+        
         return  tau
     
         
