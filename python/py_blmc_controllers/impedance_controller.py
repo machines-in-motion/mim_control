@@ -46,12 +46,7 @@ class ImpedanceController(object):
         '''
             Computes the distance between the two frames or computes the location
             of frame_end with respect to frame_root
-<<<<<<< HEAD:python/py_impedance_control/impedance_controller.py
-        '''        
-        self.compute_forward_kinematics(q)
-=======
         '''
->>>>>>> a023e847d1e7c0fdd11e2c97548ae3a519a11a70:python/py_blmc_controllers/impedance_controller.py
         return self.pin_robot.data.oMf[self.frame_end_idx].translation - self.pin_robot.data.oMf[self.frame_root_idx].translation
 
     def compute_relative_velocity_between_frames(self,q,dq):
