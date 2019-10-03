@@ -4,7 +4,7 @@ from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
 package_info = generate_distutils_setup()
-package_info['packages'] = ['py_impedance_control']
+package_info['packages'] = ['py_blmc_controllers']
 package_info['package_dir'] = {'': 'python'}
 package_info['install_requires'] = []
 
