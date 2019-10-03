@@ -47,6 +47,7 @@ class impedance_controller():
             Computes the distance between the two frames or computes the location 
             of frame_end with respect to frame_root
         '''        
+        self.compute_forward_kinematics(q)
         return self.pin_robot.data.oMf[self.frame_end_idx].translation - self.pin_robot.data.oMf[self.frame_root_idx].translation
                                                     
     def compute_relative_velocity_between_frames(self,q,dq):
@@ -54,6 +55,9 @@ class impedance_controller():
             computes the velocity of the end_frame with respect to a frame
             whose origin aligns with the root frame but is oriented as the world frame
         '''
+
+        # TODO: define relative vel with respect to frame oriented as the base frame but located at root frame
+        ## will be a problem in case of a back flip with current implementation. 
 
         frame_config_root = pin.SE3(self.pin_robot.data.oMf[self.frame_root_idx].rotation, np.zeros((3,1)))
         frame_config_end = pin.SE3(self.pin_robot.data.oMf[self.frame_end_idx].rotation, np.zeros((3,1)))
