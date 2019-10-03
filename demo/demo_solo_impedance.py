@@ -2,7 +2,7 @@
 ## Demo file showing how to import and use the leg impedance control for solo 12 DOF
 #################################################################################################################
 ## Author: Avadesh Meduri
-## Date: 20/09/2019 
+## Date: 20/09/2019
 #################################################################################################################
 
 import numpy as np
@@ -18,7 +18,7 @@ from pinocchio.utils import se3ToXYZQUAT
 from robot_properties_solo.config import Solo12Config
 from robot_properties_solo.quadruped12wrapper import Quadruped12Robot
 
-from py_impedance_control.solo_impedance_controller import solo_impedance_controller 
+from py_blmc_controllers.solo_impedance_controller import SoloImpedanceController
 
 from pinocchio.utils import zero
 from matplotlib import pyplot as plt
@@ -36,18 +36,18 @@ robot.reset_state(q0, dq0)
 ###################### impedance controller demo #################################
 
 x_des = 4*[0.0, 0.0, -0.25]
-xd_des = 4*[0,0,0] 
+xd_des = 4*[0,0,0]
 kp = 4 * [200,200,200]
 kd = 4 * [10.0,10.0,10.0]
 f = np.zeros(18)
 f = 4*[0.0, 0.0, (2.2*9.8)/4]
 ##################################################################################
 
-solo_leg_ctrl = solo_impedance_controller(robot)
+solo_leg_ctrl = SoloImpedanceController(robot)
 
 # Run the simulator for 100 steps
 for i in range(4000):
-    # TODO: Implement a controller here.    
+    # TODO: Implement a controller here.
     # Step the simulator.
     p.stepSimulation()
     time.sleep(0.001) # You can sleep here if you want to slow down the replay
