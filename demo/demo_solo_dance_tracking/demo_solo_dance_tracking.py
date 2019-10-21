@@ -6,6 +6,9 @@ import os
 import os.path
 import rospkg
 import pybullet as p
+
+import eigenpy
+eigenpy.switchToNumpyArray()
 import pinocchio as se3
 from pinocchio.utils import se3ToXYZQUAT
 
@@ -92,8 +95,9 @@ if __name__ == "__main__":
         w_com = centr_controller.compute_com_wrench(t, q, dq, plan)
         F = centr_controller.compute_force_qp(t, q, dq, plan, w_com)
 
-        tau = solo_leg_ctrl.return_joint_torques(q, dq, kp, kd, plan['eff_positions'],
-                                                plan['eff_velocities'], F)
+        tau = solo_leg_ctrl.return_joint_torques(q, dq, kp, kd,
+                                                plan['eff_positions'][t],
+                                                plan['eff_velocities'][t], F)
         robot.send_joint_command(tau)
 
         p.stepSimulation()

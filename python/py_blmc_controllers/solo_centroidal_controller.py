@@ -8,6 +8,8 @@ from cvxopt import matrix, solvers
 import numpy as np
 import pinocchio as pin
 
+arr = lambda a: np.array(a).reshape(-1)
+mat = lambda a: np.matrix(a).reshape((-1, 1))
 
 class SoloCentroidalController(object):
     def __init__(self, m, mu, kc, dc, kb, db, kc_leg, kd_leg, robot, hip_ids, eff_ids):
@@ -36,9 +38,10 @@ class SoloCentroidalController(object):
         """
         m = self._m
         robot = self._robot
+
         com = arr(robot.com(q, dq)[0])
         vcom = arr(robot.vcom(q, dq))
-        Ib = robot.mass(q)[:3, :3]
+        Ib = robot.mass(q)[3:6, 3:6]
 
         quat_diff = arr(pin.difference(robot.model, q, mat(plan['q'][t]))[3:6])
 
