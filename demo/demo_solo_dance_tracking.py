@@ -8,7 +8,6 @@ import rospkg
 import pybullet as p
 
 import eigenpy
-eigenpy.switchToNumpyArray()
 import pinocchio as se3
 from pinocchio.utils import se3ToXYZQUAT
 
@@ -81,20 +80,32 @@ if __name__ == "__main__":
     kd = 4 * [10.0,10.0,10.0]
 
     solo_leg_ctrl = SoloImpedanceController(robot)
-    centr_controller = SoloCentroidalController(total_mass, mu=0.6, kc=0., dc=0.0, kb=0., db=0.0,
-                                            kc_leg=0., kd_leg=0.,
-                                            robot=robot.pin_robot, hip_ids=robot.pinocchio_hip_ids,
-                                            eff_ids=robot.pinocchio_endeff_ids)
+    centr_controller = SoloCentroidalController(robot.pin_robot, total_mass,
+            mu=0.6, kc=0., dc=0.0, kb=0., db=0.0, robot.pinocchio_endeff_ids)
 
     robot.reset_state(q0, dq0)
     p.stepSimulation()
 
     for t in range(100):
+        t = 0
+
         q, dq = robot.get_state_update_pinocchio()
 
-        w_com = centr_controller.compute_com_wrench(t, q, dq, plan)
+        # Centroidal wrench from the plan.
+        w_com = np.hstack([
+            plan['centroidal_forces'][t],
+            plan['centroidal_moments'][t]
+        ])
+
+        # Centroidal correction using basically PD controller.
+        w_com += centr_controller.compute_com_wrench(t, q, dq,
+            plan['com'][t], plan['vcom'][t],
+            plan['q'][t][3:7], plan['base_ang_velocities'][t])
+
+        # Compute the desired force at the endeffectors.
         F = centr_controller.compute_force_qp(t, q, dq, plan, w_com)
 
+        # Compute torque using impedance controller.
         tau = solo_leg_ctrl.return_joint_torques(q, dq, kp, kd,
                                                 plan['eff_positions'][t],
                                                 plan['eff_velocities'][t], F)
