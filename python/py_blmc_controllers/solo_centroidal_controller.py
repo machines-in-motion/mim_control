@@ -4,9 +4,11 @@ Author: Julian Viereck
 Date: 3 Oct 2019
 """
 
-from cvxopt import matrix, solvers
+
 import numpy as np
 import pinocchio as pin
+
+from py_blmc_controllers.qp_solver import quadprog_solve_qp
 
 arr = lambda a: np.array(a).reshape(-1)
 mat = lambda a: np.matrix(a).reshape((-1, 1))
@@ -95,10 +97,9 @@ class SoloCentroidalController(object):
 
         A[:, -6:] = np.eye(6)
 
-        sol = solvers.qp(matrix(Q), matrix(p), matrix(G), matrix(h), matrix(A), matrix(b),
-                         options={'show_progress': False})
-
-        solx = np.array(sol['x']).reshape(-1)
+        solx = quadprog_solve_qp(Q, p, G, h, A, b)
+    
+        #solx = np.array(sol['x']).reshape(-1)
 
         F = np.zeros(12)
         j = 0

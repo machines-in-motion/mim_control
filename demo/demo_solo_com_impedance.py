@@ -45,7 +45,7 @@ if __name__ == "__main__":
     f = np.zeros(18)
     f = 4*[0.0, 0.0, (2.2*9.8)/4]
         
-    x_com = [0.0, 0.0, 0.22]
+    x_com = [0.0, 0.0, 0.25]
     xd_com = [0.0, 0.0, 0.0]
 
     x_ori = [0., 0., 0., 1.]
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     
 
     solo_leg_ctrl = SoloImpedanceController(robot)
-    centr_controller = SoloCentroidalController(robot.pin_robot, total_mass, mu=0.6, kc=100000., dc=50., kb=0., db=0., 
+    centr_controller = SoloCentroidalController(robot.pin_robot, total_mass, mu=0.6, kc=1000., dc=10., kb=50., db=0.01, 
                                                 eff_ids=robot.pinocchio_endeff_ids)
 
     robot.reset_state(q0, dq0)
