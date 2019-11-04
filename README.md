@@ -4,6 +4,14 @@
 
 This packages contains all controllers for the quadruped, hopper and anyother BLMC robot that is fabricated in the future
 
+## Dependencies
+
+Install the following dependencies
+
+```
+pip3 install --user cvxopt
+```
+
 
 ## Authors
 - Avadesh Meduri 

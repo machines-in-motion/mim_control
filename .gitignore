@@ -1,4 +1,5 @@
 *.txt~
+*.dat
 
 ###
 # Based on:
@@ -71,7 +72,6 @@ acs-*.bib
 
 # endnotes
 *.ent
-
 # fixme
 *.lox
 
