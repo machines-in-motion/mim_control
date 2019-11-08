@@ -23,18 +23,18 @@ class SoloCentroidalController(object):
         self._kb = kb
         self._db = db
         self._eff_ids = eff_ids
-        
+
     def compute_com_wrench(self, t, q, dq, des_pos, des_vel, des_ori, des_angvel):
         """Compute the desired COM wrench (equation 1).
 
         Args:
-          t: Timestep to compute w_com 
-          des_pos: desired center of mass position at time t
-          des_vel: desired center of mass velocity at time t
-          des_ori: desired base orientation at time t (quaternions)
-          des_angvel: desired base angular velocity at time t
+            t: Timestep to compute w_com
+            des_pos: desired center of mass position at time t
+            des_vel: desired center of mass velocity at time t
+            des_ori: desired base orientation at time t (quaternions)
+            des_angvel: desired base angular velocity at time t
         Returns:
-          Computed w_com
+            Computed w_com
         """
         m = self._m
         robot = self._robot
@@ -44,7 +44,7 @@ class SoloCentroidalController(object):
         Ib = robot.mass(q)[3:6, 3:6]
 
         quat_diff = self.quaternion_difference(arr(q[3:7]), arr(des_ori))
-        
+
         w_com = np.hstack([
             m * self._kc * (des_pos - com) + m * self._dc * (des_vel - vcom),
             arr(Ib * self._kb * mat(quat_diff)) + self._db * (des_angvel - arr(dq[3:6]))
@@ -53,10 +53,20 @@ class SoloCentroidalController(object):
         return w_com
 
     def compute_force_qp(self, t, q, dq, cnt_array, w_com):
+        """Computes the forces needed to generated a desired centroidal wrench.
+
+        Args:
+            t: Timestep.
+            q: Generalized robot position configuration.
+            q: Generalized robot velocity configuration.
+            cnt_array: Array with {0, 1} of #endeffector size indicating if
+                an endeffector is in contact with the ground or not. Forces are
+                only computed for active endeffectors.
+            w_com: Desired centroidal wrench to achieve given forces.
+        Returns:
+            Computed forces as a plain array of size 3 * num_endeffectors.
         """
-        To be done
-        """
-        
+
         robot = self._robot
         com = robot.com(q, dq)[0]
         r = [robot.data.oMf[i].translation - com for i in self._eff_ids]
@@ -98,8 +108,6 @@ class SoloCentroidalController(object):
         A[:, -6:] = np.eye(6)
 
         solx = quadprog_solve_qp(Q, p, G, h, A, b)
-    
-        #solx = np.array(sol['x']).reshape(-1)
 
         F = np.zeros(12)
         j = 0
@@ -107,8 +115,11 @@ class SoloCentroidalController(object):
             if cnt_array[i] == 0:
                 continue
             F[3*i: 3*(i + 1)] = solx[3*j: 3*(j + 1)]
+            j += 1
 
         return F
+
+
     #### quaternion stuff
     def skew(self, v):
         '''converts vector v to skew symmetric matrix'''
@@ -160,9 +171,9 @@ class SoloCentroidalController(object):
 
     def quaternion_difference(self, q1, q2):
         """computes the tangent vector from q1 to q2 at Identity
-        returns vecotr w  
-        s.t. q2 = exp(.5 * w)*q1  
-        """        
+        returns vecotr w
+        s.t. q2 = exp(.5 * w)*q1
+        """
         # first compute dq s.t.  q2 = q1*dq
         q1conjugate = np.array([-q1[0], -q1[1], -q1[2], q1[3]])
         # order of multiplication is very essential here
