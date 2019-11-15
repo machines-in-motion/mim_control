@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     solo_leg_ctrl = SoloImpedanceController(robot)
     centr_controller = SoloCentroidalController(robot.pin_robot, total_mass,
-            mu=0.6, kc=100., dc=5., kb=200., db=1.,
+            mu=0.6, kc=[100,100,100], dc=[5,5,5], kb=[200,200,200], db=[1.,1.,1.],
             eff_ids=robot.pinocchio_endeff_ids)
 
     robot.reset_state(q0, dq0)
