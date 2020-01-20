@@ -58,7 +58,14 @@ class SoloImpedanceController(object):
                                  self.quadruped_leg_names[3] + self.quadruped_name_connector[0] + self.quadruped_frame_names[1],\
                                      15)
 
+        self.imps = [self.FL_imp, self.FR_imp, self.HL_imp, self.HR_imp]
 
+    def world_xdes_to_local(self, x_des_world):
+        """
+        Converts a x_des given in world frame to an x_des in coordinate system
+        used by the impedance controller (relative distance between foot
+        to endeffector)
+        """
 
     def return_joint_torques(self, q, dq, kp, kd, x_des, xd_des, f):
         '''
