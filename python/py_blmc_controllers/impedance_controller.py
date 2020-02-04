@@ -56,7 +56,7 @@ class ImpedanceController(object):
         '''
 
         # TODO: define relative vel with respect to frame oriented as the base frame but located at root frame
-        ## will be a problem in case of a back flip with current implementation. 
+        ## will be a problem in case of a back flip with current implementation.
 
         frame_config_root = pin.SE3(self.pin_robot.data.oMf[self.frame_root_idx].rotation, np.zeros((3,1)))
         frame_config_end = pin.SE3(self.pin_robot.data.oMf[self.frame_end_idx].rotation, np.zeros((3,1)))
@@ -116,12 +116,9 @@ class ImpedanceController(object):
         xd = self.compute_relative_velocity_between_frames(q,dq)
 
         jac = self.compute_jacobian(q)
-        tau = -1*jac.T.dot(f + kp*(x - x_des) + kd*(xd - xd_des))
+
+        # Store force for learning project.
+        self.F_ = f + kp*(x - x_des) + kd*(xd - xd_des)
+        tau = -1*jac.T.dot(F_)
 
         return  tau
-
-
-
-
-
-
