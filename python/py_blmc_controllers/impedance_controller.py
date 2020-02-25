@@ -74,8 +74,7 @@ class ImpedanceController(object):
         '''
         self.compute_forward_kinematics(q)
         jac = pin.frameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_end_idx)
-        jac = jac[:,self.start_column:self.start_column+3][0:3]
-        jac = self.pin_robot.data.oMf[self.frame_end_idx].rotation.dot(jac)
+        jac = self.pin_robot.data.oMf[self.frame_end_idx].rotation.dot(jac[0:3])
         return jac
 
     def compute_impedance_torques(self, q, dq, kp, kd, x_des, xd_des, f):
@@ -115,10 +114,51 @@ class ImpedanceController(object):
         x = self.compute_distance_between_frames(q)
         xd = self.compute_relative_velocity_between_frames(q,dq)
 
-        jac = self.compute_jacobian(q)
+        jac = self.compute_jacobian(q)[:, self.start_column:self.start_column+3]
 
         # Store force for learning project.
         self.F_ = f + kp*(x - x_des) + kd*(xd - xd_des)
-        tau = -1*jac.T.dot(F_)
+        tau = -jac.T.dot(self.F_)
 
+        return  tau
+
+    def compute_impedance_torques_world(self, q, dq, kp, kd, x_des, xd_des, f):
+        """Computes the leg impedance using world coordiante x_des and xd_des.
+
+        Args:
+            q: pinocchio generalized coordiantes of robot
+            dq: pinocchio generalized velocity of robot
+            kp: (list size 3) P gains for position error.
+            kd: (list size 3) D gains for velocity error.
+            x_des: (list size 3) desired endeffector position size 3.
+            xd_des: (list size 3) desired endeffector velocity size 3.
+            f: (list size 3) feedforward force to apply at endeffector.
+        """
+        assert (np.shape(x_des) == (3,))
+        assert (np.shape(xd_des) == (3,))
+        assert (np.shape(f) == (3,))
+        assert (np.shape(kp) == (3,))
+        assert (np.shape(kd) == (3,))
+
+        #### Reshaping values to desired shapes
+
+        x_des = np.matrix(x_des).T
+        xd_des = np.matrix(xd_des).T
+        f = np.matrix(f).T
+        kp = np.diag(kp)
+        kd = np.diag(kd)
+
+        #######################################
+
+        self.compute_forward_kinematics(q)
+        jac = self.compute_jacobian(q)
+
+        x = self.pin_robot.data.oMf[self.frame_end_idx].translation
+        xd = jac.dot(dq)
+
+        jac = jac[:, self.start_column:self.start_column+3]
+
+        # Store force for learning project.
+        self.F_ = f + kp*(x - x_des) + kd*(xd - xd_des)
+        tau = -jac.T.dot(self.F_)
         return  tau
