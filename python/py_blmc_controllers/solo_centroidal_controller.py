@@ -46,8 +46,8 @@ class SoloCentroidalController(object):
         quat_diff = self.quaternion_difference(arr(q[3:7]), arr(des_ori))
 
         w_com = np.hstack([
-            m * np.multiply(self._kc ,(des_pos - com)) + m * np.multiply(self._dc, (des_vel - vcom)),
-            arr(Ib * mat(np.multiply(self._kb, quat_diff))) + np.multiply(self._db,(des_angvel - arr(dq[3:6])))
+            m * np.multiply(self._kc, des_pos - com) + m * np.multiply(self._dc, des_vel - vcom),
+            arr(arr( np.multiply(self._kb, quat_diff)) + (Ib * mat(np.multiply(self._db, des_angvel - arr(dq[3:6])))).T)
         ])
 
         return w_com
