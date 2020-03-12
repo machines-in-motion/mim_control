@@ -58,7 +58,7 @@ class BoltImpedanceController(object):
 
         tau = zero(6)
         r = zero(6)
-        tau[0:3] = self.FL_imp.compute_impedance_torques(q,dq,kp[0:3],kd[0:3],x_des[0:3],xd_des[0:3],f[0:3])
-        tau[3:6] = self.FR_imp.compute_impedance_torques(q,dq,kp[3:6],kd[3:6], x_des[3:6], xd_des[3:6],f[3:6])
+        tau[0:3], r[0:3] = self.FL_imp.compute_impedance_torques(q,dq,kp[0:3],kd[0:3],x_des[0:3],xd_des[0:3],f[0:3])
+        tau[3:6], r[3:6] = self.FR_imp.compute_impedance_torques(q,dq,kp[3:6],kd[3:6], x_des[3:6], xd_des[3:6],f[3:6])
 
-        return tau
+        return tau, r

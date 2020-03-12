@@ -55,13 +55,12 @@ class BoltCentroidalController(object):
         # print("desired xyz", np.array(R.from_quat([np.array(des_ori)[:]]).as_euler('xyz', degrees=False))[0, :])
         # print("quat_diff", quat_diff)
         from pyquaternion import Quaternion
-        import quaternion
+        # import quaternion
 
         # print(q[3])
         # q1 = Quaternion([des_ori[3], des_ori[0], des_ori[1], des_ori[2]])
         # q2 = Quaternion([q[6], q[3], q[4], q[5]])
         # # p_q = Quaternion([des_angvel[6], des_angvel[3], des_angvel[4], des_angvel[5]])
-        # print("!!!!!!!!!!!!!!!!!!!!!!!!!!")
         # q3 = Quaternion.__mul__(q2.conjugate, q1)
         # print("dif1", Quaternion.__sub__(q1, q2))
         # print("dif2", Quaternion.__mul__(q2.conjugate, q1)) #Lhum nemidonam chera barabar nistan dif1 != dif2
@@ -159,6 +158,7 @@ class BoltCentroidalController(object):
                 continue
             F[3*i: 3*(i + 1)] = solx[3*j: 3*(j + 1)]
             j += 1
+        print("end_forces", solx)
 
         return F
 
@@ -199,8 +199,6 @@ class BoltCentroidalController(object):
             return 2 * v/w * (1 - vnorm**2/(3*w**2))
         else:
             return 2*np.arctan2(vnorm, w) * v / vnorm
-        #https://math.stackexchange.com/questions/2552/the-logarithm-of-quaternion/2554#2554
-        #ln𝐪=(ln|𝐪|,(1‖𝑣‖arccos𝑠|𝑞|)𝑣)
 
     def quaternion_product(self, q1, q2):
         """ computes quaternion product of q1 x q2 """

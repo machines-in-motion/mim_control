@@ -118,7 +118,7 @@ class ImpedanceController(object):
         jac = self.compute_jacobian(q)
         tau = -1*jac.T.dot(f + kp*(x - x_des) + kd*(xd - xd_des))
 
-        return tau
+        return tau , kp*(x - x_des) + kd*(xd - xd_des)
 
 
 
