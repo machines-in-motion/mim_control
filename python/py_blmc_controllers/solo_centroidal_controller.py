@@ -54,7 +54,6 @@ class SoloCentroidalController(object):
 
     def compute_force_qp(self, t, q, dq, cnt_array, w_com):
         """Computes the forces needed to generated a desired centroidal wrench.
-
         Args:
             t: Timestep.
             q: Generalized robot position configuration.
@@ -69,6 +68,7 @@ class SoloCentroidalController(object):
 
         robot = self._robot
         com = robot.com(q, dq)[0]
+        foot_loc = [robot.data.oMf[i].translation for i in self._eff_ids]
         r = [robot.data.oMf[i].translation - com for i in self._eff_ids]
 
         # Use the contact activation from the plan to determine which of the forces

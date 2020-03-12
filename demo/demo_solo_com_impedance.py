@@ -54,13 +54,13 @@ if __name__ == "__main__":
 
     solo_leg_ctrl = SoloImpedanceController(robot)
     centr_controller = SoloCentroidalController(robot.pin_robot, total_mass,
-            mu=0.6, kc=[100,100,100], dc=[5,5,5], kb=[200,200,200], db=[1.,1.,1.],
+            mu=0.6, kc=[200,200,200], dc=[5,5,5], kb=[200,200,200], db=[1.,1.,1.],
             eff_ids=robot.pinocchio_endeff_ids)
 
     robot.reset_state(q0, dq0)
     p.stepSimulation()
 
-    for t in range(2500):
+    for t in range(5500):
         q, dq = robot.get_state_update_pinocchio()
 
         w_com = centr_controller.compute_com_wrench(t, q, dq, x_com, xd_com, x_ori, x_angvel)
