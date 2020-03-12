@@ -60,13 +60,6 @@ class SoloImpedanceController(object):
 
         self.imps = [self.FL_imp, self.FR_imp, self.HL_imp, self.HR_imp]
 
-    def world_xdes_to_local(self, x_des_world):
-        """
-        Converts a x_des given in world frame to an x_des in coordinate system
-        used by the impedance controller (relative distance between foot
-        to endeffector)
-        """
-
     def return_joint_torques(self, q, dq, kp, kd, x_des, xd_des, f):
         '''
         Returns the joint torques at the current timestep
@@ -77,5 +70,16 @@ class SoloImpedanceController(object):
         tau[3:6] = self.FR_imp.compute_impedance_torques(q,dq,kp[3:6],kd[3:6], x_des[3:6], xd_des[3:6],f[3:6])
         tau[6:9] = self.HL_imp.compute_impedance_torques(q,dq,kp[6:9],kd[6:9], x_des[6:9],xd_des[6:9],f[6:9])
         tau[9:12] = self.HR_imp.compute_impedance_torques(q,dq,kp[9:12],kd[9:12], x_des[9:12],xd_des[9:12], f[9:12])
+
+        return tau
+
+    def return_joint_torques_world(self, q, dq, kp, kd, x_des, xd_des, f):
+        """Returns joint torques with x_des and xd_des in world coordinates."""
+        tau = zero(12)
+        for i, imp in enumerate(self.imps):
+            s = slice(3*i, 3*(i+1))
+            tau[s] = imp.compute_impedance_torques_world(
+                q, dq, kp[s], kd[s], x_des[s], xd_des[s], f[s]
+            )
 
         return tau
