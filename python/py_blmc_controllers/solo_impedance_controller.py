@@ -8,7 +8,7 @@
 #################################################################################################################
 
 
-from py_blmc_controllers.impedance_controller import ImpedanceController
+from py_blmc_controllers.impedance_controller import ImpedanceController, ImpedanceControllerSolo8
 from pinocchio.utils import zero
 
 
@@ -79,6 +79,62 @@ class SoloImpedanceController(object):
         for i, imp in enumerate(self.imps):
             s = slice(3*i, 3*(i+1))
             tau[s] = imp.compute_impedance_torques_world(
+                q, dq, kp[s], kd[s], x_des[s], xd_des[s], f[s]
+            )
+
+        return tau
+
+class Solo8ImpedanceController(SoloImpedanceController):
+    def initialise_leg_impedance(self):
+        '''
+        Creates the springs behaviour between the hip and foot
+        '''
+
+        self.FL_imp = ImpedanceControllerSolo8(self.quadruped_leg_names[0] + "_imp",\
+                                 self.quadruped_robot.pin_robot, \
+                                 self.quadruped_leg_names[0] + self.quadruped_name_connector[0] + self.quadruped_frame_names[0],\
+                                 self.quadruped_leg_names[0] + self.quadruped_name_connector[0] + self.quadruped_frame_names[1],\
+                                    6)
+
+        self.FR_imp = ImpedanceControllerSolo8(self.quadruped_leg_names[1] + "_imp",\
+                                 self.quadruped_robot.pin_robot, \
+                                 self.quadruped_leg_names[1] + self.quadruped_name_connector[0] + self.quadruped_frame_names[0],\
+                                 self.quadruped_leg_names[1] + self.quadruped_name_connector[0] + self.quadruped_frame_names[1],\
+                                     8)
+
+        self.HL_imp = ImpedanceControllerSolo8(self.quadruped_leg_names[2] + "_imp",\
+                                 self.quadruped_robot.pin_robot, \
+                                 self.quadruped_leg_names[2] + self.quadruped_name_connector[0] + self.quadruped_frame_names[0],\
+                                 self.quadruped_leg_names[2] + self.quadruped_name_connector[0] + self.quadruped_frame_names[1],\
+                                     10)
+
+        self.HR_imp = ImpedanceControllerSolo8(self.quadruped_leg_names[3] + "_imp",\
+                                 self.quadruped_robot.pin_robot, \
+                                 self.quadruped_leg_names[3] + self.quadruped_name_connector[0] + self.quadruped_frame_names[0],\
+                                 self.quadruped_leg_names[3] + self.quadruped_name_connector[0] + self.quadruped_frame_names[1],\
+                                     12)
+
+        self.imps = [self.FL_imp, self.FR_imp, self.HL_imp, self.HR_imp]
+
+    def return_joint_torques(self, q, dq, kp, kd, x_des, xd_des, f):
+        '''
+        Returns the joint torques at the current timestep
+        '''
+
+        tau = zero(8)
+        tau[0:2] = self.FL_imp.compute_impedance_torques(q,dq,kp[0:3],kd[0:3],x_des[0:3],xd_des[0:3],f[0:3])
+        tau[2:4] = self.FR_imp.compute_impedance_torques(q,dq,kp[3:6],kd[3:6], x_des[3:6], xd_des[3:6],f[3:6])
+        tau[4:6] = self.HL_imp.compute_impedance_torques(q,dq,kp[6:9],kd[6:9], x_des[6:9],xd_des[6:9],f[6:9])
+        tau[6:8] = self.HR_imp.compute_impedance_torques(q,dq,kp[9:12],kd[9:12], x_des[9:12],xd_des[9:12], f[9:12])
+
+        return tau
+
+    def return_joint_torques_world(self, q, dq, kp, kd, x_des, xd_des, f):
+        """Returns joint torques with x_des and xd_des in world coordinates."""
+        tau = zero(8)
+        for i, imp in enumerate(self.imps):
+            s = slice(3*i, 3*(i+1))
+            tau[2*i:2*(i+1)] = imp.compute_impedance_torques_world(
                 q, dq, kp[s], kd[s], x_des[s], xd_des[s], f[s]
             )
 
