@@ -54,7 +54,6 @@ class ImpedanceController(object):
             computes the velocity of the end_frame with respect to a frame
             whose origin aligns with the root frame but is oriented as the world frame
         '''
-
         # TODO: define relative vel with respect to frame oriented as the base frame but located at root frame
         ## will be a problem in case of a back flip with current implementation.
 
