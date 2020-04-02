@@ -195,13 +195,11 @@ class ImpedanceControllerSolo8(ImpedanceController):
         x = self.compute_distance_between_frames(q)
         xd = self.compute_relative_velocity_between_frames(q,dq)
 
-        sel_idx = np.array([0, 2])
-        jac = self.compute_jacobian(q)[sel_idx, self.start_column:self.start_column+2]
+        jac = self.compute_jacobian(q)
 
         # Store force for learning project.
         self.F_ = f + kp*(x - x_des) + kd*(xd - xd_des)
-        tau = -jac.T.dot(self.F_[sel_idx])
-
+        tau = -jac.T.dot(self.F_)
         return  tau
 
     def compute_impedance_torques_world(self, q, dq, kp, kd, x_des, xd_des, f):
@@ -238,11 +236,8 @@ class ImpedanceControllerSolo8(ImpedanceController):
         x = self.pin_robot.data.oMf[self.frame_end_idx].translation
         xd = jac.dot(dq)
 
-        sel_idx = np.array([0, 2])
-        jac = self.compute_jacobian(q)[sel_idx, self.start_column:self.start_column+2]
-
         # Store force for learning project.
         self.F_ = f + kp*(x - x_des) + kd*(xd - xd_des)
-        tau = -jac.T.dot(self.F_[sel_idx])
+        tau = -jac.T.dot(self.F_)
 
         return  tau
