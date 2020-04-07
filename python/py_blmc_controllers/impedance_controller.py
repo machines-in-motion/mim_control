@@ -61,10 +61,10 @@ class ImpedanceController(object):
         frame_config_root = pin.SE3(self.pin_robot.data.oMf[self.frame_root_idx].rotation, np.zeros((3,1)))
         frame_config_end = pin.SE3(self.pin_robot.data.oMf[self.frame_end_idx].rotation, np.zeros((3,1)))
 
-        vel_root_in_world_frame = (frame_config_root.action * pin.frameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_root_idx)).dot(dq)[0:3]
-        vel_end_in_world_frame = (frame_config_end.action * pin.frameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_end_idx)).dot(dq)[0:3]
+        vel_root_in_world_frame = frame_config_root.action.dot(pin.computeFrameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_root_idx)).dot(dq)[0:3]
+        vel_end_in_world_frame = frame_config_end.action.dot(pin.computeFrameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_end_idx)).dot(dq)[0:3]
 
-        return vel_end_in_world_frame - vel_root_in_world_frame
+        return np.subtract(vel_end_in_world_frame, vel_root_in_world_frame).T
 
     def compute_jacobian(self,q):
         '''
@@ -73,7 +73,7 @@ class ImpedanceController(object):
             Selection of the required portion of the jacobian is also done here
         '''
         self.compute_forward_kinematics(q)
-        jac = pin.frameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_end_idx)
+        jac = pin.computeFrameJacobian(self.pin_robot.model, self.pin_robot.data, q, self.frame_end_idx)
         jac = self.pin_robot.data.oMf[self.frame_end_idx].rotation.dot(jac[0:3])
         return jac
 
@@ -97,14 +97,14 @@ class ImpedanceController(object):
 
         #### Reshaping values to desired shapes
 
-        x_des = np.matrix(x_des).T
-        xd_des = np.matrix(xd_des).T
-        f = np.matrix(f).T
-        kp = np.matrix([[kp[0],0,0],
+        x_des = np.array(x_des)
+        xd_des = np.array(xd_des)
+        f = np.array(f)
+        kp = np.array([[kp[0],0,0],
                         [0,kp[1],0],
                         [0,0,kp[2]]])
 
-        kd = np.matrix([[kd[0],0,0],
+        kd = np.array([[kd[0],0,0],
                         [0,kd[1],0],
                         [0,0,kd[2]]])
 
@@ -113,12 +113,11 @@ class ImpedanceController(object):
         self.compute_forward_kinematics(q)
         x = self.compute_distance_between_frames(q)
         xd = self.compute_relative_velocity_between_frames(q,dq)
-
         jac = self.compute_jacobian(q)[:, self.start_column:self.start_column+3]
 
         # Store force for learning project.
-        self.F_ = f + kp*(x - x_des) + kd*(xd - xd_des)
-        tau = -jac.T.dot(self.F_)
+        self.F_ = f + np.matmul(kp, (x - x_des)) + np.matmul(kd, (xd - xd_des).T).T
+        tau = -jac.T.dot(self.F_.T)
 
         return  tau
 
