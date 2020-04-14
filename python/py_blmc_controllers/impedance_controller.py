@@ -140,11 +140,11 @@ class ImpedanceController(object):
 
         #### Reshaping values to desired shapes
 
-        x_des = np.matrix(x_des).T
-        xd_des = np.matrix(xd_des).T
-        f = np.matrix(f).T
-        kp = np.diag(kp)
-        kd = np.diag(kd)
+        x_des = np.array(x_des)
+        xd_des = np.array(xd_des)
+        f = np.array(f)
+        kp = np.array(kp)
+        kd = np.array(kd)
 
         #######################################
 
