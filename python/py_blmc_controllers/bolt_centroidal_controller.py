@@ -5,7 +5,6 @@
 
 import numpy as np
 import pinocchio as pin
-from pyquaternion import Quaternion
 from py_blmc_controllers.qp_solver import quadprog_solve_qp
 
 arr = lambda a: np.array(a).reshape(-1)
@@ -46,6 +45,7 @@ class BoltCentroidalController(object):
             np.multiply(self._kpa, quat_diff) + np.multiply(self._kda, (des_angvel -
             arr(np.matrix([[dq[3].item()], [dq[4].item()], [dq[5].item()]]))))#np.matrix([[dq[3].item()], [dq[4].item()], [dq[5].item()]])))
         ])
+
         return w_com
 
     def compute_force_qp(self, q, dq, cnt_array, w_com):
@@ -109,7 +109,6 @@ class BoltCentroidalController(object):
                 continue
             F[3*i: 3*(i + 1)] = solx[3*j: 3*(j + 1)]
             j += 1
-        print("end_forces", solx)
 
         return F
 
