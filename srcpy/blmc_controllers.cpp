@@ -9,6 +9,8 @@
 
 #include <pybind11/pybind11.h>
 
+namespace blmc_controllers{
+
 void bind_impedance_controller(pybind11::module &module);
 
 PYBIND11_MODULE(blmc_controllers, m) {
@@ -24,3 +26,5 @@ PYBIND11_MODULE(blmc_controllers, m) {
 
   bind_impedance_controller(m);
 }
+
+} // namespace blmc_controllers

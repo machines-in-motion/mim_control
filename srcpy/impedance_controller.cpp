@@ -13,8 +13,9 @@
 #include <pybind11/numpy.h>
 #include <boost/python.hpp>
 
-using namespace blmc_controllers;
 namespace py = pybind11;
+
+namespace blmc_controllers{
 
 void bind_impedance_controller(py::module& module)
 {
@@ -67,3 +68,5 @@ void bind_impedance_controller(py::module& module)
              &ImpedanceController::get_impedance_force,
              py::return_value_policy::reference);
 }
+
+} // blmc_controllers
