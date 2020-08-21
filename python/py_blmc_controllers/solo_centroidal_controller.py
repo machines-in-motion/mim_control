@@ -23,6 +23,8 @@ class SoloCentroidalController(object):
         self._kb = kb
         self._db = db
         self._eff_ids = eff_ids
+        self.qp_penalty_lin = 3 * [1e6,]
+        self.qp_penalty_ang = 3 * [1e6,]
 
     def compute_com_wrench(self, t, q, dq, des_pos, des_vel, des_ori, des_angvel):
         """Compute the desired COM wrench (equation 1).
@@ -77,7 +79,8 @@ class SoloCentroidalController(object):
 
         # Setup the QP problem.
         Q = 2. * np.eye(3 * N + 6)
-        Q[-6:,-6:] = 1e6 * np.eye(6)
+        Q[-6:-3,-6:-3] = np.diag(self.qp_penalty_lin)
+        Q[-3:,-3:] = np.diag(self.qp_penalty_ang)
         p = np.zeros(3 * N + 6)
         A = np.zeros((6, 3 * N + 6))
         b = w_com
