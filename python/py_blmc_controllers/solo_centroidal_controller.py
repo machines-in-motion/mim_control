@@ -25,6 +25,7 @@ class SoloCentroidalController(object):
         self._eff_ids = eff_ids
         self.qp_penalty_lin = 3 * [1e6,]
         self.qp_penalty_ang = 3 * [1e6,]
+        self.rotate_vel_error = False
 
     def compute_com_wrench(self, t, q, dq, des_pos, des_vel, des_ori, des_angvel):
         """Compute the desired COM wrench (equation 1).
@@ -47,9 +48,20 @@ class SoloCentroidalController(object):
 
         quat_diff = self.quaternion_difference(arr(q[3:7]), arr(des_ori))
 
+        cur_angvel = arr(dq[3:6])
+
+        if self.rotate_vel_error:
+            # Rotate the des and current angular velocity into the world frame.
+            quat_des = pin.Quaternion(des_ori[3], des_ori[0], des_ori[1], des_ori[2]).matrix()
+            des_angvel = quat_des.dot(des_angvel)
+
+            quat_cur = pin.Quaternion(q[6], q[3], q[4], q[5]).matrix()
+            cur_angvel = quat_cur.dot(cur_angvel)
+
+
         w_com = np.hstack([
             m * np.multiply(self._kc, des_pos - com) + m * np.multiply(self._dc, des_vel - vcom),
-            arr(arr( np.multiply(self._kb, quat_diff)) + (Ib * mat(np.multiply(self._db, des_angvel - arr(dq[3:6])))).T)
+            arr(arr( np.multiply(self._kb, quat_diff)) + (Ib * mat(np.multiply(self._db, des_angvel - cur_angvel))).T)
         ])
 
         return w_com
