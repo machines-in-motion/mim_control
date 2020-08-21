@@ -18,7 +18,7 @@ from pinocchio.utils import se3ToXYZQUAT
 from robot_properties_solo.config import Solo8Config
 from robot_properties_solo.solo8wrapper import Solo8Robot
 
-from py_blmc_controllers.solo_impedance_controller import Solo8ImpedanceController
+from py_blmc_controllers.solo_impedance_controller import SoloImpedanceController
 
 from pinocchio.utils import zero
 from matplotlib import pyplot as plt
@@ -43,7 +43,7 @@ f = np.zeros(18)
 f = 4*[0.0, 0.0, (2.2*9.8)/4]
 ##################################################################################
 
-solo_leg_ctrl = Solo8ImpedanceController(robot)
+solo_leg_ctrl = SoloImpedanceController(robot)
 
 # Run the simulator for 100 steps
 for i in range(4000):

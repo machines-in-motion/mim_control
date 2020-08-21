@@ -5,7 +5,6 @@
 
 import numpy as np
 import pinocchio as pin
-from pyquaternion import Quaternion
 from py_blmc_controllers.qp_solver import quadprog_solve_qp
 
 arr = lambda a: np.array(a).reshape(-1)
@@ -33,19 +32,20 @@ class BoltCentroidalController(object):
         Returns:
             Computed w_com
         """
-        m = self._mass
-        robot = self._robot
-
-        com = arr(robot.com(q, dq)[0])
-        vcom = arr(robot.vcom(q, dq))
-        Ib = robot.mass(q)[3:6, 3:6]
+        # Check the difference between robot.com and q[0:3]
+        # com = arr(robot.com(q, dq)[0])
+        # vcom = arr(robot.vcom(q, dq))
+        com = np.reshape(np.array(q[0:3]), (3,))
+        vcom = np.reshape(np.array(dq[0:3]), (3,))
         quat_diff = self.quaternion_difference(arr(q[3:7]), arr(des_ori))
 
         w_com = np.hstack([
             np.multiply(self._kp, (des_com_pos - com)) + np.multiply(self._kd, (des_vel - vcom)),
             np.multiply(self._kpa, quat_diff) + np.multiply(self._kda, (des_angvel -
-            arr(np.matrix([[dq[3].item()], [dq[4].item()], [dq[5].item()]]))))#np.matrix([[dq[3].item()], [dq[4].item()], [dq[5].item()]])))
+            arr(np.matrix([[dq[3].item()], [dq[4].item()], [dq[5].item()]]))))
         ])
+       
+        # print(des_com_pos[2], com[2])
         return w_com
 
     def compute_force_qp(self, q, dq, cnt_array, w_com):
@@ -109,7 +109,6 @@ class BoltCentroidalController(object):
                 continue
             F[3*i: 3*(i + 1)] = solx[3*j: 3*(j + 1)]
             j += 1
-        print("end_forces", solx)
 
         return F
 
