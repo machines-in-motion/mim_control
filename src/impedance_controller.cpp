@@ -36,6 +36,9 @@ void ImpedanceController::initialize(const pinocchio::Model& pinocchio_model,
     root_jacobian_.resize(6, pinocchio_model_.nv);
     end_jacobian_.resize(6, pinocchio_model_.nv);
     impedance_jacobian_.resize(6, pinocchio_model_.nv);
+
+    // output
+    torques_.resize(pinocchio_model_.nv, 1);
 }
 
 void ImpedanceController::run(
@@ -111,6 +114,8 @@ void ImpedanceController::run(
 
 Eigen::VectorXd& ImpedanceController::get_torques()
 {
+    // model.joint[1].shortname()
+    // model.names[1] == "root_joint"
     return torques_;
 }
 
