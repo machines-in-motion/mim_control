@@ -8,7 +8,7 @@ Date: 3 Oct 2019
 import numpy as np
 import pinocchio as pin
 
-from py_blmc_controllers.qp_solver import quadprog_solve_qp
+from . qp_solver import quadprog_solve_qp
 
 arr = lambda a: np.array(a).reshape(-1)
 mat = lambda a: np.matrix(a).reshape((-1, 1))
