@@ -14,12 +14,13 @@ pip3 install --user cvxopt
 
 
 ## Authors
-- Avadesh Meduri 
+- Avadesh Meduri
+- Paarth Shaah 
 - Julian Viereck
 
 ## Copyrights
 
-Copyright(c) 2019-2020 Max Planck Gesellschaft, New York University
+Copyright(c) 2019-2020 New York University, Max Planck Gesellschaft
 
 ## License
 
