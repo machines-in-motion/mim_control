@@ -17,7 +17,7 @@ import pinocchio as se3
 from bullet_utils.env import BulletEnvWithGround
 from robot_properties_solo.solo12wrapper import Solo12Robot, Solo12Config
 
-from py_blmc_controllers.solo_impedance_controller import SoloImpedanceController
+from blmc_controllers.solo_impedance_controller import SoloImpedanceController
 
 from pinocchio.utils import zero
 from matplotlib import pyplot as plt
@@ -45,7 +45,7 @@ f = np.zeros(18)
 f = 4*[0.0, 0.0, (2.2*9.8)/4]
 # ##################################################################################
 
-# solo_leg_ctrl = SoloImpedanceController(robot)
+solo_leg_ctrl = SoloImpedanceController(robot)
 
 # # Run the simulator for 100 steps
 for i in range(4000):
@@ -54,5 +54,5 @@ for i in range(4000):
     env.step(sleep=True) # You can sleep here if you want to slow down the replay
     # Read the final state and forces after the stepping.
     q, dq = robot.get_state()
-    # tau = solo_leg_ctrl.return_joint_torques(q,dq,kp,kd,x_des,xd_des,f)
+    tau = solo_leg_ctrl.return_joint_torques(q,dq,kp,kd,x_des,xd_des,f)
     robot.send_joint_command(tau)

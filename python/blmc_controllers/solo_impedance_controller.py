@@ -8,7 +8,7 @@
 #################################################################################################################
 
 
-from py_blmc_controllers.impedance_controller import ImpedanceController, ImpedanceControllerSolo8
+from . impedance_controller import ImpedanceController, ImpedanceControllerSolo8
 from pinocchio.utils import zero
 
 

@@ -6,7 +6,7 @@
 ## Author : Elham
 #################################################################################################################
 
-from py_blmc_controllers.impedance_controller import ImpedanceController
+from . impedance_controller import ImpedanceController
 from pinocchio.utils import zero
 
 

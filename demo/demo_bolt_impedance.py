@@ -14,7 +14,7 @@ import pinocchio as se3
 from robot_properties_bolt.config import BoltConfig
 from robot_properties_bolt.bolt_wrapper import BoltRobot
 
-from py_blmc_controllers.bolt_impedance_controller import BoltImpedanceController
+from blmc_controllers.bolt_impedance_controller import BoltImpedanceController
 
 
 robot = BoltRobot()
