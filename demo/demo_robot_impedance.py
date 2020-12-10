@@ -1,27 +1,18 @@
 ##################################################################################################################
-## Demo file showing how to import and use the leg impedance control for solo 12 DOF
+## Demo file creates impedance controllers between different frames  
+## based on the input yaml file
 #################################################################################################################
-## Author: Avadesh Meduri
-## Date: 20/09/2019
+## Author: Avadesh Meduri & Paarth Shah
+## Date: 9/12/2020
 #################################################################################################################
 
 import numpy as np
-
 import time
-
 import os
-import rospkg
-import pybullet as p
-import pinocchio as se3
 
+from blmc_controllers.robot_impedance_controller import RobotImpedanceController
 from bullet_utils.env import BulletEnvWithGround
 from robot_properties_solo.solo12wrapper import Solo12Robot, Solo12Config
-
-from blmc_controllers.solo_impedance_controller import SoloImpedanceController
-
-from pinocchio.utils import zero
-from matplotlib import pyplot as plt
-
 
 # Create a Pybullet simulation environment
 env = BulletEnvWithGround()
@@ -45,7 +36,9 @@ f = np.zeros(18)
 f = 4*[0.0, 0.0, (2.2*9.8)/4]
 # ##################################################################################
 
-solo_leg_ctrl = SoloImpedanceController(robot)
+config_file = "./solo_impedance.yaml"
+
+solo_leg_ctrl = RobotImpedanceController(robot, config_file)
 
 # # Run the simulator for 100 steps
 for i in range(4000):
