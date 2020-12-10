@@ -41,9 +41,18 @@ python3 demo_robot_com_ctrl.py
 - Julian Viereck
 
 ## Cite
----
-Grimminger, Felix, Avadesh Meduri, Majid Khadiv, Julian Viereck, Manuel Wüthrich, Maximilien Naveau, Vincent Berenz et al. "An open torque-controlled modular robot architecture for legged locomotion research." IEEE Robotics and Automation Letters 5, no. 2 (2020): 3650-3657.
----
+```
+@article{grimminger2020open,
+  title={An open torque-controlled modular robot architecture for legged locomotion research},
+  author={Grimminger, Felix and Meduri, Avadesh and Khadiv, Majid and Viereck, Julian and W{\"u}thrich, Manuel and Naveau, Maximilien and Berenz, Vincent and Heim, Steve and Widmaier, Felix and Flayols, Thomas and others},
+  journal={IEEE Robotics and Automation Letters},
+  volume={5},
+  number={2},
+  pages={3650--3657},
+  year={2020},
+  publisher={IEEE}
+}
+```
 
 ## Copyrights
 
