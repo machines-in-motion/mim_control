@@ -10,6 +10,7 @@
 
 from . impedance_controller import ImpedanceController, ImpedanceControllerSolo8
 from pinocchio.utils import zero
+import yaml
 
 
 class SoloImpedanceController(object):
@@ -26,7 +27,29 @@ class SoloImpedanceController(object):
         self.quadruped_leg_names = ['FL', 'FR', 'HL', 'HR']
         self.quadruped_frame_names = ['HFE', 'FOOT']
         self.quadruped_name_connector = ['_']
+        self.num_eef = 0
         self.initialise_leg_impedance()
+        config_file = 'yaml_example.yaml'
+        self.initialise_read_yaml(config_file)
+
+    def initialise_read_yaml(self, config_file):
+        self.imps_yaml = []
+        with open(config_file) as config:
+            data_in = yaml.safe_load(config)
+        for ctrls in data_in["impedance_controllers"]:
+            if int(data_in["impedance_controllers"][ctrls]["is_eeff"]):
+                self.num_eef += 1
+
+            #TODO:  
+            #Check here to make sure frame names exist in pinocchio robot_model/data structure
+
+            #Append to list of impedance controllers
+            self.imps_yaml.append(ImpedanceController(ctrls, \
+                                            self.quadruped_robot.pin_robot, \
+                                            data_in["impedance_controllers"][ctrls]["frame_root_name"], \
+                                            data_in["impedance_controllers"][ctrls]["frame_end_name"], \
+                                            int(data_in["impedance_controllers"][ctrls]["start_column"])
+                                            ))
 
 
     def initialise_leg_impedance(self):
@@ -64,7 +87,6 @@ class SoloImpedanceController(object):
         '''
         Returns the joint torques at the current timestep
         '''
-
         tau = zero(12)
         tau[0:3] = self.FL_imp.compute_impedance_torques(q,dq,kp[0:3],kd[0:3],x_des[0:3],xd_des[0:3],f[0:3])
         tau[3:6] = self.FR_imp.compute_impedance_torques(q,dq,kp[3:6],kd[3:6], x_des[3:6], xd_des[3:6],f[3:6])

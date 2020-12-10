@@ -8,6 +8,8 @@ This packages contains all controllers for the quadruped, hopper and anyother BL
 ```
 - Pinocchio
 - PyBullet
+- Quadprog
+- Matplotlib (Optional, needed to run demos)
 - Robot_Properties_Solo (Optional, needed to run demos)
 - Robot_Properties_Bolt (Optional, needed to run demos)
 ```
