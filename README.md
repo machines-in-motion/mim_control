@@ -32,7 +32,7 @@ To run the Center of Mass controller on Solo12 follow the below mentioned steps
 ```
 source /opt/openrobots/setup.bash (source open robots)
 cd demo
-python3 demo_solo_impedance.py
+python3 demo_robot_com_ctrl.py
 ```
 
 ## Authors
