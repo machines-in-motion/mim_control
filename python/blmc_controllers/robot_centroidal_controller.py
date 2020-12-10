@@ -98,8 +98,8 @@ class RobotCentroidalController:
 
         # Use the contact activation from the plan to determine which of the forces
         # should be active.
-        N = (int)(np.sum(cnt_array))
-
+        N = (int)(robot.nb_ee)
+        assert len(cnt_array) == robot.nb_ee
         # Setup the QP problem.
         Q = 2. * np.eye(3 * N + 6)
         Q[-6:-3,-6:-3] = np.diag(self.qp_penalty_lin)
@@ -112,7 +112,7 @@ class RobotCentroidalController:
         h = np.zeros((5 * N))
 
         j = 0
-        for i in range(len(cnt_array)):
+        for i in range(robot.nb_ee):
             if cnt_array[i] == 0:
                 continue
 
