@@ -1,8 +1,8 @@
-# BLMC_controllers
+# BLMC Controllers
 
 ## What it is
 
-This packages contains all controllers for the quadruped, hopper and anyother BLMC robot that is fabricated in the future
+This packages contains generic controllers that can be used for a biped, quadruped, hopper and any other robot. The controllers are created based on the nature of the robot and its properties such as number of end effectors etc..
 
 ## Dependencies
 ```
@@ -21,24 +21,29 @@ pip3 install .
 ```
 
 ## Running Demos
-To run the impedance controller on Solo12 follow the below mentioned steps
+To run the impedance controller on Solo12 follow the below mentioned steps 
+```
+source /opt/openrobots/setup.bash (source open robots)
+cd demo
+python3 demo_robot_impedance.py
+```
+
+To run the Center of Mass controller on Solo12 follow the below mentioned steps
 ```
 source /opt/openrobots/setup.bash (source open robots)
 cd demo
 python3 demo_solo_impedance.py
 ```
 
-To run the impedance controller on Bolt follow the below mentioned steps
-```
-source /opt/openrobots/setup.bash (source open robots)
-cd demo
-python3 demo_bolt_impedance.py
-```
-
 ## Authors
 - Avadesh Meduri
 - Paarth Shaah 
 - Julian Viereck
+
+## Cite
+```
+Grimminger, Felix, Avadesh Meduri, Majid Khadiv, Julian Viereck, Manuel Wüthrich, Maximilien Naveau, Vincent Berenz et al. "An open torque-controlled modular robot architecture for legged locomotion research." IEEE Robotics and Automation Letters 5, no. 2 (2020): 3650-3657.
+```
 
 ## Copyrights
 
