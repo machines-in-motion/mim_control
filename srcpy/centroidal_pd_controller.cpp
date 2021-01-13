@@ -8,26 +8,25 @@
  */
 
 #include "mim_control/centroidal_pd_controller.hpp"
-#include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
-namespace mim_control{
-
+namespace mim_control
+{
 void bind_centroidal_pd_controller(py::module& module)
 {
     py::class_<CentroidalPDController>(module, "CentroidalPDController")
         .def(py::init<>())
 
         // Public methods.
-        .def("initialize",  &CentroidalPDController::initialize)
-        .def("run",  &CentroidalPDController::run)
+        .def("initialize", &CentroidalPDController::initialize)
+        .def("run", &CentroidalPDController::run)
         .def("get_wrench",
              &CentroidalPDController::get_wrench,
-             py::return_value_policy::reference)
-        ;
+             py::return_value_policy::reference);
 }
 
-} // mim_control
+}  // namespace mim_control

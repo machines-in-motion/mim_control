@@ -4,7 +4,8 @@
  * @copyright Copyright (c) 2020, New York University and Max Planck
  * Gesellschaft
  *
- * @brief Implements a qp allocating forces to track a desired centroidal wrench.
+ * @brief Implements a qp allocating forces to track a desired centroidal
+ * wrench.
  *
  */
 
@@ -37,12 +38,14 @@ public:
      * @param qp_penalty_lin The penalty weight for the linear wcom violation.
      * @param qp_penalty_ang The penalty weight for the angular wcom violation.
      */
-    void initialize(int number_endeffectors, double friction_coeff,
-                    double qp_penalty_lin, double qp_penalty_ang);
+    void initialize(int number_endeffectors,
+                    double friction_coeff,
+                    double qp_penalty_lin,
+                    double qp_penalty_ang);
 
     /**
      * @brief Computes the centroidal wrench using a PD controller.
-     * 
+     *
      * @param w_com The desired centroidal wrench to track.
      * @param relative_position_endeff The relative position of the endeffectors
      *     with respect to the center of mass.
@@ -79,7 +82,6 @@ private:  // attributes
     double qp_penalty_ang_;
 
     eiquadprog::solvers::EiquadprogFast qp_;
-
 };
 
 }  // namespace mim_control
