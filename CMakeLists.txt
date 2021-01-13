@@ -6,7 +6,7 @@
 #
 cmake_minimum_required(VERSION 3.10.2)
 
-project(blmc_controllers)
+project(mim_control)
 
 # specify the C++ 17 standard
 set(CMAKE_CXX_STANDARD 17)
@@ -22,22 +22,22 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -fPIC")
 #
 # Dependencies
 #
+
+# Local depends
+find_package(yaml_utils REQUIRED)
+find_package(mpi_cmake_modules REQUIRED)
+
+# External dependencies
+# Extract major/minor python version
+find_package(Python REQUIRED)
+string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+list(GET VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)
+list(GET VERSION_LIST 1 PYTHONLIBS_VERSION_MINOR)
+find_package(Boost REQUIRED COMPONENTS python${PYTHONLIBS_VERSION_MAJOR})
 find_package(pybind11 CONFIG REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(pinocchio REQUIRED)
 find_package(eiquadprog REQUIRED)
-
-find_package(PythonLibs REQUIRED)
-# Extract major/minor python version
-string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
-list(GET VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)
-list(GET VERSION_LIST 1 PYTHONLIBS_VERSION_MINOR)
-find_package(Boost COMPONENTS python${PYTHONLIBS_VERSION_MAJOR}${PYTHONLIBS_VERSION_MINOR} REQUIRED)
-
-#local depends
-find_package(mpi_cmake_modules REQUIRED)
-find_package(yaml_utils REQUIRED)
-
 
 ###########################
 # Create the main library #

@@ -7,10 +7,10 @@
  * @brief Implementation of the ImpedanceController class.
  */
 
-#include "blmc_controllers/impedance_controller.hpp"
+#include "mim_control/impedance_controller.hpp"
 #include "pinocchio/algorithm/frames.hpp"
 
-namespace blmc_controllers
+namespace mim_control
 {
 ImpedanceController::ImpedanceController()
 {
@@ -67,7 +67,8 @@ void ImpedanceController::run(
     root_placement_ = pinocchio_data_.oMf[root_frame_index_];
     end_placement_ = pinocchio_data_.oMf[end_frame_index_];
     root_velocity_ =
-        pinocchio::getFrameVelocity(pinocchio_model_, pinocchio_data_,
+        pinocchio::getFrameVelocity(pinocchio_model_,
+                                    pinocchio_data_,
                                     root_frame_index_,
                                     pinocchio::LOCAL_WORLD_ALIGNED);
     end_velocity_ = pinocchio::getFrameVelocity(pinocchio_model_,
@@ -76,11 +77,12 @@ void ImpedanceController::run(
                                                 pinocchio::LOCAL_WORLD_ALIGNED);
 
     // Compute the force to be applied to the environment.
-    impedance_force_ = gain_proportional * pinocchio::log6(
-                           desired_end_frame_placement.actInv(
-                               root_placement_.actInv(end_placement_)))
-                           .toVector()
-                           .array();
+    impedance_force_ =
+        gain_proportional *
+        pinocchio::log6(desired_end_frame_placement.actInv(
+                            root_placement_.actInv(end_placement_)))
+            .toVector()
+            .array();
 
     impedance_force_ += (gain_derivative * (desired_end_frame_velocity -
                                             (end_velocity_ - root_velocity_))
@@ -124,4 +126,4 @@ ImpedanceController::Vector6d& ImpedanceController::get_impedance_force()
     return impedance_force_;
 }
 
-}  // namespace blmc_controllers
+}  // namespace mim_control

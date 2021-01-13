@@ -15,8 +15,8 @@ This packages contains generic controllers that can be used for a biped, quadrup
 ```
 ## Installation
 ```
-git clone git@github.com:avadesh02/blmc_controllers.git
-cd blmc_controllers
+git clone git@github.com:avadesh02/mim_control.git
+cd mim_control
 pip3 install .
 ```
 

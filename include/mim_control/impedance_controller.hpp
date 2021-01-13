@@ -14,7 +14,7 @@
 #include "pinocchio/multibody/data.hpp"
 #include "pinocchio/multibody/model.hpp"
 
-namespace blmc_controllers
+namespace mim_control
 {
 /**
  * @brief Impedance controller between any two frames of the robot.
@@ -69,17 +69,17 @@ public:
      *
      * @param robot_configuration robot generalized coordinates configuration.
      * @param robot_velocity robot generalized coordinates velocity.
-     * @param gain_proportional 6d vector for the proportionnal gains on {x, y,
+     * @param gain_proportional 6d vector for the proportional gains on {x, y,
      * z, roll, pitch, yaw}.
-     * @param gain_derivative 6d vector for the proportionnal gains on {x, y, z,
+     * @param gain_derivative 6d vector for the proportional gains on {x, y, z,
      * roll, pitch, yaw}.
      * @param gain_feed_forward_force gain multiplying the feed forward force.
-     * @param desired_end_frame_placement desired end fram placement relative to
-     * the desired root joint.
+     * @param desired_end_frame_placement desired end frame placement relative
+     * to the desired root joint.
      * @param desired_end_frame_velocity desired end frame velocity relative to
      * the desired root joint.
      * @param feed_forward_force feed forward force applied to the foot by the
-     * environement.
+     * environment.
      */
     void run(Eigen::Ref<const Eigen::VectorXd> robot_configuration,
              Eigen::Ref<const Eigen::VectorXd> robot_velocity,
@@ -99,8 +99,8 @@ public:
 
     /**
      * @brief Get the impedance force \f$ f_i \f$ with \f$ \tau = J^T f_i \f$.
-     * 
-     * @return Eigen::VectorXd& 
+     *
+     * @return Eigen::VectorXd&
      */
     Vector6d& get_impedance_force();
 
@@ -152,4 +152,4 @@ private:  // attributes
     Eigen::VectorXd torques_;
 };
 
-}  // namespace blmc_controllers
+}  // namespace mim_control
