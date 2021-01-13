@@ -12,8 +12,10 @@
 namespace blmc_controllers{
 
 void bind_impedance_controller(pybind11::module &module);
+void bind_centroidal_pd_controller(pybind11::module &module);
+void bind_centroidal_force_qp_controller(pybind11::module& module);
 
-PYBIND11_MODULE(blmc_controllers, m) {
+PYBIND11_MODULE(py_blmc_controllers, m) {
   m.doc() = R"pbdoc(
         blmc_controllers python bindings
         ---------------------------------
@@ -25,6 +27,8 @@ PYBIND11_MODULE(blmc_controllers, m) {
     )pbdoc";
 
   bind_impedance_controller(m);
+  bind_centroidal_pd_controller(m);
+  bind_centroidal_force_qp_controller(m);
 }
 
 } // namespace blmc_controllers

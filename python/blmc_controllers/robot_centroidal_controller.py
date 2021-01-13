@@ -120,7 +120,7 @@ class RobotCentroidalController:
             A[3:, 3 * j:3 * (j + 1)] = pin.skew(r[i])
 
             G[5*j + 0, 3 * j + 0] = 1    # mu Fz - Fx >= 0
-            G[5*j + 0, 3 * j + 2] = -self.robot_mass
+            G[5*j + 0, 3 * j + 2] = -self.mu
             G[5*j + 1, 3 * j + 0] = -1     # mu Fz + Fx >= 0
             G[5*j + 1, 3 * j + 2] = -self.mu
             G[5*j + 2, 3 * j + 1] = 1    # mu Fz - Fy >= 0
