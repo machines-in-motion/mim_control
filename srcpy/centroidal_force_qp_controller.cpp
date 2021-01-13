@@ -7,14 +7,14 @@
  * @brief Python bindings for the CentroidalForceQPController class.
  */
 
-#include "blmc_controllers/centroidal_force_qp_controller.hpp"
+#include "mim_control/centroidal_force_qp_controller.hpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 
 namespace py = pybind11;
 
-namespace blmc_controllers{
+namespace mim_control{
 
 void bind_centroidal_force_qp_controller(py::module& module)
 {
@@ -30,4 +30,4 @@ void bind_centroidal_force_qp_controller(py::module& module)
         ;
 }
 
-} // blmc_controllers
+} // mim_control

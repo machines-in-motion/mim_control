@@ -7,10 +7,10 @@
  * @brief Implementation of the ImpedanceController class.
  */
 
-#include "blmc_controllers/impedance_controller.hpp"
+#include "mim_control/impedance_controller.hpp"
 #include "pinocchio/algorithm/frames.hpp"
 
-namespace blmc_controllers
+namespace mim_control
 {
 ImpedanceController::ImpedanceController()
 {
@@ -124,4 +124,4 @@ ImpedanceController::Vector6d& ImpedanceController::get_impedance_force()
     return impedance_force_;
 }
 
-}  // namespace blmc_controllers
+}  // namespace mim_control

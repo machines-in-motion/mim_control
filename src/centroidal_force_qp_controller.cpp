@@ -9,9 +9,9 @@
  */
 
 #include <iostream>
-#include "blmc_controllers/centroidal_force_qp_controller.hpp"
+#include "mim_control/centroidal_force_qp_controller.hpp"
 
-namespace blmc_controllers
+namespace mim_control
 {
 
 
@@ -135,4 +135,4 @@ Eigen::VectorXd& CentroidalForceQPController::get_forces()
     return forces_;
 }
 
-}  // namespace blmc_controllers
+}  // namespace mim_control

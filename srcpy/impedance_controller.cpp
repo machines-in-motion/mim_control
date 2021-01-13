@@ -7,7 +7,7 @@
  * @brief Python bindings for the StepperHead class
  */
 
-#include "blmc_controllers/impedance_controller.hpp"
+#include "mim_control/impedance_controller.hpp"
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
@@ -15,7 +15,7 @@
 
 namespace py = pybind11;
 
-namespace blmc_controllers{
+namespace mim_control{
 
 void bind_impedance_controller(py::module& module)
 {
@@ -69,4 +69,4 @@ void bind_impedance_controller(py::module& module)
              py::return_value_policy::reference);
 }
 
-} // blmc_controllers
+} // mim_control

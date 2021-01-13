@@ -9,16 +9,16 @@ import numpy as np
 import time
 
 
-from blmc_controllers.robot_impedance_controller import RobotImpedanceController
-from blmc_controllers.robot_centroidal_controller import RobotCentroidalController
+from mim_control.robot_impedance_controller import RobotImpedanceController
+from mim_control.robot_centroidal_controller import RobotCentroidalController
 from bullet_utils.env import BulletEnvWithGround
 from robot_properties_solo.solo12wrapper import Solo12Robot, Solo12Config
 from robot_properties_bolt.bolt_wrapper import BoltRobot, BoltConfig
 
 # Create a Pybullet simulation environment
 env = BulletEnvWithGround()
-solo = False
-bolt = True
+solo = True
+bolt = False
 # Create a robot instance. This initializes the simulator as well.
 if solo:
     robot = env.add_robot(Solo12Robot)

@@ -8,9 +8,9 @@
  *
  */
 
-#include "blmc_controllers/centroidal_pd_controller.hpp"
+#include "mim_control/centroidal_pd_controller.hpp"
 
-namespace blmc_controllers
+namespace mim_control
 {
 
 
@@ -87,4 +87,4 @@ Vector6d& CentroidalPDController::get_wrench()
     return wrench_;
 }
 
-}  // namespace blmc_controllers
+}  // namespace mim_control
