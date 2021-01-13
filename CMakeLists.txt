@@ -1,89 +1,118 @@
 # BSD 3-clause
-# Copyright (c) 2020, New York University and Max Planck Gesellschaft
-cmake_minimum_required(VERSION 3.5.1)
+# Copyright (c) 2021, New York University and Max Planck Gesellschaft
+
+#
+# set up the project
+#
+cmake_minimum_required(VERSION 3.10.2)
 
 project(blmc_controllers)
 
-# required to use std::shared_ptr in code and to link the python bindings
-if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--no-as-needed")
-endif()
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -W -Wextra")
+# specify the C++ 17 standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# ensuring path to libraries are set during install
-set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+# Some additionnal optimization for the code.
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -fPIC")
 
 ############################
 # Search for dependencies. #
 ############################
 
-set(CATKIN_PKGS ${CATKIN_PKGS}
-    # MPI-IS dependencies
-    mpi_cmake_modules
-    pybind11_catkin
-)
-find_package(catkin REQUIRED COMPONENTS ${CATKIN_PKGS})
+#
+# Dependencies
+#
+find_package(pybind11 CONFIG REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(pinocchio REQUIRED)
+find_package(eiquadprog REQUIRED)
 
-# catkin customised search macros.
-SET(BOOST_COMPONENTS
-      filesystem system thread program_options unit_test_framework python)
-search_for_python()
-search_for_boost()
-search_for_eigen()
-catkin_add_required_dependency("pinocchio >= 2.0")
+find_package(PythonLibs REQUIRED)
+# Extract major/minor python version
+string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+list(GET VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)
+list(GET VERSION_LIST 1 PYTHONLIBS_VERSION_MINOR)
+find_package(Boost COMPONENTS python${PYTHONLIBS_VERSION_MAJOR}${PYTHONLIBS_VERSION_MINOR} REQUIRED)
 
-######################################################
-# define the include directory of all ${CATKIN_PKGS} #
-######################################################
-include_directories(
-  ${PROJECT_SOURCE_DIR}/include
-  ${catkin_INCLUDE_DIRS}
-)
+#local depends
+find_package(mpi_cmake_modules REQUIRED)
+find_package(yaml_utils REQUIRED)
 
-##########################################
-# export the package as a catkin package #
-##########################################
-set(library_list ${PROJECT_NAME})
-catkin_package(
-    LIBRARIES ${library_list}
-    # INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include}
-    CATKIN_DEPENDS ${CATKIN_PKGS}
-)
-
-##############################
-# manage python file install #
-##############################
-catkin_python_setup()
 
 ###########################
 # Create the main library #
 ###########################
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
     src/impedance_controller.cpp
+    src/centroidal_pd_controller.cpp
+    src/centroidal_force_qp_controller.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
+target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME} eiquadprog::eiquadprog)
+target_link_libraries(${PROJECT_NAME} yaml_utils::yaml_utils)
+
+# Includes. Add the include dependencies
+target_include_directories(
+  ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                         $<INSTALL_INTERFACE:include>)
 
 ################################
-# python bindings with pybind11#
+# Install the package          #
 ################################
-pybind11_add_module(py_${PROJECT_NAME}
+
+# command to install the library and binaries
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}Targets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES
+  DESTINATION include
+)
+
+# we also need to install the header files
+install(DIRECTORY include/ DESTINATION include)
+
+# ################################
+# # python bindings with pybind11#
+# ################################
+pybind11_add_module(py_${PROJECT_NAME} MODULE
     srcpy/${PROJECT_NAME}.cpp
     srcpy/impedance_controller.cpp
+    srcpy/centroidal_pd_controller.cpp
+    srcpy/centroidal_force_qp_controller.cpp
 )
-target_link_libraries(
-    py_${PROJECT_NAME} PRIVATE ${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_PYTHON_LIBRARY})
-set_target_properties(py_${PROJECT_NAME} PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}
-  OUTPUT_NAME ${PROJECT_NAME}
-)
-install(TARGETS py_${PROJECT_NAME} DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
+
+target_link_libraries(py_${PROJECT_NAME} PRIVATE pybind11::module)
+target_link_libraries(py_${PROJECT_NAME} PRIVATE ${PROJECT_NAME})
+target_link_libraries(py_${PROJECT_NAME} PRIVATE ${Boost_PYTHON_LIBRARY})
+
+# install the bindings
+get_python_install_dir(PYTHON_INSTALL_DIR)
+install(TARGETS py_${PROJECT_NAME} DESTINATION ${PYTHON_INSTALL_DIR})
+
+################################
+# install python packages      #
+################################
+
+# install the python package too
+install(
+    DIRECTORY python/${PROJECT_NAME}
+    DESTINATION "${PYTHON_INSTALL_DIR}"
+    PATTERN "*.pyc" EXCLUDE
+    PATTERN "__pycache__" EXCLUDE
+  )
 
 ##########################
 # building documentation #
 ##########################
-add_sphinx_documentation()
+add_documentation()
+
+############################
+# create the cmake package #
+############################
+generate_cmake_package(INSTALL_EXPORT)
