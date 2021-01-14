@@ -9,6 +9,7 @@
  */
 
 #include "mim_control/centroidal_force_qp_controller.hpp"
+
 #include <iostream>
 
 namespace mim_control
@@ -119,8 +120,8 @@ void CentroidalForceQPController::run(
 
     // Solve the QP.
     // std::cout << "Solution result: ";
-    auto status =
-        qp_.solve_quadprog(hess_, g0_, ce_new_, w_com, ci_, ci0_, sol_);
+    // auto status =
+    qp_.solve_quadprog(hess_, g0_, ce_new_, w_com, ci_, ci0_, sol_);
     // std::cout << status << std::endl;
     forces_ = sol_.head(3 * nb_eff_);
 }
