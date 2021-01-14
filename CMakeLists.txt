@@ -30,10 +30,7 @@ find_package(mpi_cmake_modules REQUIRED)
 # External dependencies
 # Extract major/minor python version
 find_package(Python REQUIRED)
-string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
-list(GET VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)
-list(GET VERSION_LIST 1 PYTHONLIBS_VERSION_MINOR)
-find_package(Boost REQUIRED COMPONENTS python${PYTHONLIBS_VERSION_MAJOR})
+find_package(Boost REQUIRED COMPONENTS python${Python_VERSION_MAJOR})
 find_package(pybind11 CONFIG REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(pinocchio REQUIRED)
@@ -79,21 +76,20 @@ install(DIRECTORY include/ DESTINATION include)
 # ################################
 # # python bindings with pybind11#
 # ################################
-pybind11_add_module(py_${PROJECT_NAME} MODULE
+pybind11_add_module(${PROJECT_NAME}_cpp MODULE
     srcpy/${PROJECT_NAME}.cpp
     srcpy/impedance_controller.cpp
     srcpy/centroidal_pd_controller.cpp
     srcpy/centroidal_force_qp_controller.cpp
 )
 
-
-target_link_libraries(py_${PROJECT_NAME} PRIVATE pybind11::module)
-target_link_libraries(py_${PROJECT_NAME} PRIVATE ${PROJECT_NAME})
-target_link_libraries(py_${PROJECT_NAME} PRIVATE ${Boost_PYTHON_LIBRARY})
+target_link_libraries(${PROJECT_NAME}_cpp PRIVATE pybind11::module)
+target_link_libraries(${PROJECT_NAME}_cpp PRIVATE ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_cpp PRIVATE ${Boost_PYTHON_LIBRARY})
 
 # install the bindings
 get_python_install_dir(PYTHON_INSTALL_DIR)
-install(TARGETS py_${PROJECT_NAME} DESTINATION ${PYTHON_INSTALL_DIR})
+install(TARGETS ${PROJECT_NAME}_cpp DESTINATION ${PYTHON_INSTALL_DIR})
 
 ################################
 # install python packages      #

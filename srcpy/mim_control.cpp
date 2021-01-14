@@ -15,7 +15,7 @@ void bind_impedance_controller(pybind11::module &module);
 void bind_centroidal_pd_controller(pybind11::module &module);
 void bind_centroidal_force_qp_controller(pybind11::module &module);
 
-PYBIND11_MODULE(py_mim_control, m)
+PYBIND11_MODULE(mim_control_cpp, m)
 {
     m.doc() = R"pbdoc(
         mim_control python bindings
