@@ -116,6 +116,9 @@ void ImpedanceController::run(
 
 Eigen::VectorXd& ImpedanceController::get_torques()
 {
+    /// @todo get joint torque here,
+    /// automatically determine if we need to remove the free_flyer or not
+
     // model.joint[1].shortname()
     // model.names[1] == "root_joint"
     return torques_;
