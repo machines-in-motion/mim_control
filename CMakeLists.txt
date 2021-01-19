@@ -1,5 +1,5 @@
-# BSD 3-clause
-# Copyright (c) 2021, New York University and Max Planck Gesellschaft
+# BSD 3-clause Copyright (c) 2021, New York University and Max Planck
+# Gesellschaft
 
 #
 # set up the project
@@ -15,36 +15,36 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Some additionnal optimization for the code.
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -fPIC")
 
-############################
-# Search for dependencies. #
-############################
+#
+# Local include module.
+#
+include(cmake/boost_python.cmake)
 
 #
-# Dependencies
+# Search for dependencies.
 #
 
 # Local depends
 find_package(yaml_utils REQUIRED)
 find_package(mpi_cmake_modules REQUIRED)
 
-# External dependencies
-# Extract major/minor python version
+# External dependencies Extract major/minor python version
 find_package(Python REQUIRED)
-find_package(Boost REQUIRED COMPONENTS python${Python_VERSION_MAJOR})
 find_package(pybind11 CONFIG REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(pinocchio REQUIRED)
 find_package(eiquadprog REQUIRED)
 
-###########################
-# Create the main library #
-###########################
+search_for_boost_python()
 
-add_library(${PROJECT_NAME} SHARED
-    src/impedance_controller.cpp
-    src/centroidal_pd_controller.cpp
-    src/centroidal_force_qp_controller.cpp
-)
+#
+# Create the main library
+#
+
+add_library(
+  ${PROJECT_NAME} SHARED
+  src/impedance_controller.cpp src/centroidal_pd_controller.cpp
+  src/centroidal_force_qp_controller.cpp)
 target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
 target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME} eiquadprog::eiquadprog)
@@ -55,9 +55,9 @@ target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include>)
 
-################################
-# Install the package          #
-################################
+#
+# Install the package
+#
 
 # command to install the library and binaries
 install(
@@ -67,48 +67,44 @@ install(
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES
-  DESTINATION include
-)
+  DESTINATION include)
 
 # we also need to install the header files
 install(DIRECTORY include/ DESTINATION include)
 
-# ################################
-# # python bindings with pybind11#
-# ################################
-pybind11_add_module(${PROJECT_NAME}_cpp MODULE
-    srcpy/${PROJECT_NAME}.cpp
-    srcpy/impedance_controller.cpp
-    srcpy/centroidal_pd_controller.cpp
-    srcpy/centroidal_force_qp_controller.cpp
-)
+#
+# python bindings with pybind11#
+#
+pybind11_add_module(
+  ${PROJECT_NAME}_cpp MODULE srcpy/${PROJECT_NAME}.cpp
+  srcpy/impedance_controller.cpp srcpy/centroidal_pd_controller.cpp
+  srcpy/centroidal_force_qp_controller.cpp)
 
 target_link_libraries(${PROJECT_NAME}_cpp PRIVATE pybind11::module)
 target_link_libraries(${PROJECT_NAME}_cpp PRIVATE ${PROJECT_NAME})
-target_link_libraries(${PROJECT_NAME}_cpp PRIVATE ${Boost_PYTHON_LIBRARY})
+target_link_boost_python(${PROJECT_NAME}_cpp PRIVATE)
 
 # install the bindings
 get_python_install_dir(PYTHON_INSTALL_DIR)
 install(TARGETS ${PROJECT_NAME}_cpp DESTINATION ${PYTHON_INSTALL_DIR})
 
-################################
-# install python packages      #
-################################
+#
+# install python packages
+#
 
 # install the python package too
 install(
-    DIRECTORY python/${PROJECT_NAME}
-    DESTINATION "${PYTHON_INSTALL_DIR}"
-    PATTERN "*.pyc" EXCLUDE
-    PATTERN "__pycache__" EXCLUDE
-  )
+  DIRECTORY python/${PROJECT_NAME}
+  DESTINATION "${PYTHON_INSTALL_DIR}"
+  PATTERN "*.pyc" EXCLUDE
+  PATTERN "__pycache__" EXCLUDE)
 
-##########################
-# building documentation #
-##########################
+#
+# building documentation
+#
 add_documentation()
 
-############################
-# create the cmake package #
-############################
+#
+# create the cmake package
+#
 generate_cmake_package(INSTALL_EXPORT)

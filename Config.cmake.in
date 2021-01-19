@@ -9,13 +9,6 @@ find_dependency(pybind11 CONFIG REQUIRED)
 find_dependency(Eigen3 REQUIRED)
 find_dependency(pinocchio REQUIRED)
 find_dependency(eiquadprog REQUIRED)
-
-find_package(PythonLibs REQUIRED)
-# Extract major/minor python version
-string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
-list(GET VERSION_LIST 0 PYTHONLIBS_VERSION_MAJOR)
-list(GET VERSION_LIST 1 PYTHONLIBS_VERSION_MINOR)
-find_dependency(Boost COMPONENTS python${PYTHONLIBS_VERSION_MAJOR}${PYTHONLIBS_VERSION_MINOR} REQUIRED)
 find_dependency(yaml_utils REQUIRED)
 
 check_required_components(mim_control)
