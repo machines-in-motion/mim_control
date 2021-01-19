@@ -16,6 +16,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -fPIC")
 
 #
+# Local include module.
+#
+include(cmake/boost_python.cmake)
+
+#
 # Search for dependencies.
 #
 
@@ -30,14 +35,7 @@ find_package(Eigen3 REQUIRED)
 find_package(pinocchio REQUIRED)
 find_package(eiquadprog REQUIRED)
 
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_NO_BOOST_CMAKE ON)
-find_package(
-  Boost REQUIRED
-  COMPONENTS
-    python${Python_VERSION_MAJOR}-py${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
-)
+search_for_boost_python()
 
 #
 # Create the main library
@@ -84,11 +82,7 @@ pybind11_add_module(
 
 target_link_libraries(${PROJECT_NAME}_cpp PRIVATE pybind11::module)
 target_link_libraries(${PROJECT_NAME}_cpp PRIVATE ${PROJECT_NAME})
-target_link_libraries(
-  ${PROJECT_NAME}_cpp
-  PRIVATE
-    Boost::python${Python_VERSION_MAJOR}-py${Python_VERSION_MAJOR}${Python_VERSION_MINOR}
-)
+target_link_boost_python(${PROJECT_NAME}_cpp PRIVATE)
 
 # install the bindings
 get_python_install_dir(PYTHON_INSTALL_DIR)

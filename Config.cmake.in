@@ -9,16 +9,6 @@ find_dependency(pybind11 CONFIG REQUIRED)
 find_dependency(Eigen3 REQUIRED)
 find_dependency(pinocchio REQUIRED)
 find_dependency(eiquadprog REQUIRED)
-
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_NO_BOOST_CMAKE ON)
-find_dependency(
-  Boost REQUIRED
-  COMPONENTS
-    python@Python_VERSION_MAJOR@-py@Python_VERSION_MAJOR@@Python_VERSION_MINOR@
-)
-
 find_dependency(yaml_utils REQUIRED)
 
 check_required_components(mim_control)
