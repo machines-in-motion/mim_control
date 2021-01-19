@@ -82,8 +82,6 @@ MACRO(SEARCH_FOR_BOOST_PYTHON)
     MESSAGE(FATAL_ERROR "Python has not been found. You should first call FindPython before calling SEARCH_FOR_BOOST_PYTHON macro.")
   ENDIF(NOT PYTHONLIBS_FOUND)
 
-  set(Boost_${UPPERCOMPONENT}_HEADER_NAME
-
   # Test: pythonX, pythonXY and python-pyXY
   SET(BOOST_PYTHON_COMPONENT_LIST
     "python${PYTHON_VERSION_MAJOR}"

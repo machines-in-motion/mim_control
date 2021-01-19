@@ -84,7 +84,7 @@ for i in range(4000):
     w_com = robot_cent_ctrl.compute_com_wrench(
         q, dq, x_com, xd_com, x_ori, x_angvel
     )
-    # distrubuting forces to the active end effectors
+    # distributing forces to the active end effectors
     F = robot_cent_ctrl.compute_force_qp(q, dq, cnt_array, w_com)
     # passing forces to the impedance controller
     tau = robot_leg_ctrl.return_joint_torques(q, dq, kp, kd, x_des, xd_des, F)
