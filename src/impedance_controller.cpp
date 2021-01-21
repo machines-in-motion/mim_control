@@ -35,6 +35,9 @@ void ImpedanceController::initialize(const pinocchio::Model& pinocchio_model,
     // initialize the size of the vectors.
     root_jacobian_.resize(6, pinocchio_model_.nv);
     end_jacobian_.resize(6, pinocchio_model_.nv);
+    end_jacobian_.fill(0.);
+    root_jacobian_.fill(0.);
+
     impedance_jacobian_.resize(6, pinocchio_model_.nv);
 
     // output
@@ -77,12 +80,12 @@ void ImpedanceController::run(
                                                 pinocchio::LOCAL_WORLD_ALIGNED);
 
     // Compute the force to be applied to the environment.
-    impedance_force_ =
-        gain_proportional *
-        pinocchio::log6(desired_end_frame_placement.actInv(
-                            root_placement_.actInv(end_placement_)))
-            .toVector()
-            .array();
+    const pinocchio::SE3 diff = desired_end_frame_placement.actInv(
+            root_placement_.actInv(end_placement_));
+    impedance_force_.head(3) = -gain_proportional.head(3) *
+            diff.translation().array();
+    impedance_force_.tail(3) = -gain_proportional.tail(3) *
+            pinocchio::log3(diff.rotation()).array();
 
     impedance_force_ += (gain_derivative * (desired_end_frame_velocity -
                                             (end_velocity_ - root_velocity_))
