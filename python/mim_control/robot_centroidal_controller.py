@@ -20,7 +20,7 @@ def mat(a):
 
 
 class RobotCentroidalController:
-    def __init__(self, robot_config, mu, kc, dc, kb, db):
+    def __init__(self, robot_config, mu, kc, dc, kb, db, qp_penalty_lin=3 * [1e6], qp_penalty_ang=3 * [1e6]):
         """
         Input:
             robot : pinocchio returned robot object
@@ -39,8 +39,8 @@ class RobotCentroidalController:
         self.kb = kb
         self.db = db
         self.eff_ids = self.robot_config.end_eff_ids
-        self.qp_penalty_lin = 6 * [1]
-        self.qp_penalty_ang = 3 * [1e6]
+        self.qp_penalty_lin = qp_penalty_lin
+        self.qp_penalty_ang = qp_penalty_ang
         self.rotate_vel_error = False
 
     def compute_com_wrench(self, q, dq, des_pos, des_vel, des_ori, des_angvel):
@@ -77,11 +77,13 @@ class RobotCentroidalController:
 
         w_com = np.hstack(
             [
-                np.multiply(self.kc, des_pos - com)
-                + np.multiply(self.dc, des_vel - vcom),
+                m * np.multiply(self.kc, des_pos - com)
+                + m * np.multiply(self.dc, des_vel - vcom),
                 arr(
                     arr(np.multiply(self.kb, quat_diff))
-                    + np.multiply(self.db, des_angvel - cur_angvel)
+                    + (
+                        Ib * mat(np.multiply(self.db, des_angvel - cur_angvel))
+                    ).T
                 ),
             ]
         )
@@ -115,8 +117,8 @@ class RobotCentroidalController:
         assert len(cnt_array) == nb_ee
         # Setup the QP problem.
         Q = 2.0 * np.eye(3 * nb_ee + 6)
-        Q[-6:, -6:] = np.diag(self.qp_penalty_lin)
-        Q[-4:-1, -4:-1] = np.diag(self.qp_penalty_ang)
+        Q[-6:-3, -6:-3] = np.diag(self.qp_penalty_lin)
+        Q[-3:, -3:] = np.diag(self.qp_penalty_ang)
         p = np.zeros(3 * nb_ee + 6)
         A = np.zeros((6, 3 * nb_ee + 6))
         b = w_com
