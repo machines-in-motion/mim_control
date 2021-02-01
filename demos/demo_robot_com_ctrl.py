@@ -17,8 +17,8 @@ from robot_properties_bolt.bolt_wrapper import BoltRobot, BoltConfig
 
 # Create a Pybullet simulation environment
 env = BulletEnvWithGround()
-solo = True
-bolt = False
+solo = False
+bolt = True
 # Create a robot instance. This initializes the simulator as well.
 if solo:
     robot = env.add_robot(Solo12Robot)
@@ -30,16 +30,16 @@ elif bolt:
 tau = np.zeros(robot.nb_dof)
 
 # Move the default position closer to the ground.
-initial_configuration = [0.0, 0.0, 0.21, 0.0, 0.0, 0.0, 1.0] + robot.nb_ee * [
-    0.0,
-    0.9,
-    -1.8,
-]
-Solo12Config.initial_configuration = initial_configuration
+# initial_configuration = [0.0, 0.0, 0.21, 0.0, 0.0, 0.0, 1.0] + robot.nb_ee * [
+#     0.0,
+#     0.9,
+#     -1.8,
+# ]
+# robot_config.initial_configuration = initial_configuration
 
 # # Reset the robot to some initial state.
-q0 = np.matrix(Solo12Config.initial_configuration).T
-dq0 = np.matrix(Solo12Config.initial_velocity).T
+q0 = np.matrix(robot_config.initial_configuration).T
+dq0 = np.matrix(robot_config.initial_velocity).T
 robot.reset_state(q0, dq0)
 
 x_com = [0.0, 0.0, 0.18]
@@ -54,7 +54,7 @@ cnt_array = robot.nb_ee * [
 # Impedance controller gains
 kp = robot.nb_ee * [0.0, 0.0, 0.0]  # Disable for now
 kd = robot.nb_ee * [0.0, 0.0, 0.0]
-x_des = robot.nb_ee * [0.0, 0.0, -0.25]  # Desired leg length
+x_des = robot.nb_ee * [0.0, 0.0, -q0[2].item()]  # Desired leg length
 xd_des = robot.nb_ee * [0.0, 0.0, 0.0]
 
 # initializing controllers ############################
