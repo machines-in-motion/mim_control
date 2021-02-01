@@ -61,15 +61,26 @@ xd_des = robot.nb_ee * [0.0, 0.0, 0.0]
 
 # config_file = "./solo_impedance.yaml"
 config_file = robot_config.paths["imp_ctrl_yaml"]
-
-robot_cent_ctrl = RobotCentroidalController(
-    robot_config,
-    mu=0.6,
-    kc=[200, 200, 200],
-    dc=[5, 5, 5],
-    kb=[200, 200, 200],
-    db=[1.0, 1.0, 1.0],
-)
+if solo:
+    robot_cent_ctrl = RobotCentroidalController(
+        robot_config,
+        mu=0.6,
+        kc=[200, 200, 200],
+        dc=[5, 5, 5],
+        kb=[200, 200, 200],
+        db=[1.0, 1.0, 1.0],
+    )
+elif bolt:
+    robot_cent_ctrl = RobotCentroidalController(
+        robot_config,
+        mu=0.6,
+        kc=[0, 0, 100],
+        dc=[0, 0, 10],
+        kb=[100, 100, 100],
+        db=[10.0, 10.0, 10.0],
+        qp_penalty_lin=[1, 1, 1e6],
+        qp_penalty_ang=[1e6, 1e6, 1]
+    )
 robot_leg_ctrl = RobotImpedanceController(robot, config_file)
 
 # # Run the simulator for 100 steps
