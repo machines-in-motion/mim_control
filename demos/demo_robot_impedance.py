@@ -1,5 +1,5 @@
 ##################################################################################################################
-## Demo file creates impedance controllers between different frames  
+## Demo file creates impedance controllers between different frames
 ## based on the input yaml file
 #################################################################################################################
 ## Author: Avadesh Meduri & Paarth Shah
@@ -41,12 +41,12 @@ robot.reset_state(q0, dq0)
 
 # ###################### impedance controller demo #################################
 
-x_des = robot.nb_ee*[0.0, 0.0, -0.25]
-xd_des = robot.nb_ee*[0,0,0]
-kp = robot.nb_ee * [200,200,200]
-kd = robot.nb_ee * [10.0,10.0,10.0]
-f = np.zeros(robot.nb_ee*3)
-f = robot.nb_ee*[0.0, 0.0, (2.2*9.8)/4]
+x_des = robot.nb_ee * [0.0, 0.0, -0.25]
+xd_des = robot.nb_ee * [0, 0, 0]
+kp = robot.nb_ee * [200, 200, 200]
+kd = robot.nb_ee * [10.0, 10.0, 10.0]
+f = np.zeros(robot.nb_ee * 3)
+f = robot.nb_ee * [0.0, 0.0, (2.2 * 9.8) / 4]
 # ##################################################################################
 
 # config_file = "./solo_impedance.yaml"
@@ -57,8 +57,10 @@ robot_leg_ctrl = RobotImpedanceController(robot, config_file)
 for i in range(4000):
     # TODO: Implement a controller here.
     # Step the simulator.
-    env.step(sleep=True) # You can sleep here if you want to slow down the replay
+    env.step(
+        sleep=True
+    )  # You can sleep here if you want to slow down the replay
     # Read the final state and forces after the stepping.
     q, dq = robot.get_state()
-    tau = robot_leg_ctrl.return_joint_torques(q,dq,kp,kd,x_des,xd_des,f)
+    tau = robot_leg_ctrl.return_joint_torques(q, dq, kp, kd, x_des, xd_des, f)
     robot.send_joint_command(tau)
