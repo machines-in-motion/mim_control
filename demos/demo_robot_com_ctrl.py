@@ -29,14 +29,6 @@ elif bolt:
 
 tau = np.zeros(robot.nb_dof)
 
-# Move the default position closer to the ground.
-# initial_configuration = [0.0, 0.0, 0.21, 0.0, 0.0, 0.0, 1.0] + robot.nb_ee * [
-#     0.0,
-#     0.9,
-#     -1.8,
-# ]
-# robot_config.initial_configuration = initial_configuration
-
 # # Reset the robot to some initial state.
 q0 = np.matrix(robot_config.initial_configuration).T
 dq0 = np.matrix(robot_config.initial_velocity).T
