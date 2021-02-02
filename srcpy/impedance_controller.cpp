@@ -67,6 +67,9 @@ void bind_impedance_controller(py::module& module)
         .def("get_torques",
              &ImpedanceController::get_torques,
              py::return_value_policy::reference)
+        .def("get_joint_torques",
+             &ImpedanceController::get_joint_torques,
+             py::return_value_policy::reference)
         .def("get_impedance_force",
              &ImpedanceController::get_impedance_force,
              py::return_value_policy::reference);

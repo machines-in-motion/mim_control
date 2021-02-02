@@ -95,14 +95,21 @@ public:
      *
      * @return Eigen::VectorXd&
      */
-    Eigen::VectorXd& get_torques();
+    const Eigen::VectorXd& get_torques();
+
+    /**
+     * @brief Get the computed joint torques from the impedance controller.
+     *
+     * @return Eigen::VectorXd&
+     */
+    const Eigen::VectorXd& get_joint_torques();
 
     /**
      * @brief Get the impedance force \f$ f_i \f$ with \f$ \tau = J^T f_i \f$.
      *
-     * @return Eigen::VectorXd&
+     * @return Vector6d&
      */
-    Vector6d& get_impedance_force();
+    const Vector6d& get_impedance_force();
 
 private:  // attributes
     /** @brief Rigid body dynamics model. */
@@ -150,6 +157,14 @@ private:  // attributes
 
     /** @brief Output torques. */
     Eigen::VectorXd torques_;
+
+    /** @brief Output torques. */
+    Eigen::VectorXd joint_torques_;
+
+    /** @brief Checks out if the Pinocchio rigid body model of the robot
+     * contains a free-flyer. This is used to return the command i.e. the
+     * torques to be applied to the joints only. */
+    bool pinocchio_model_has_free_flyer_;
 };
 
 }  // namespace mim_control

@@ -34,14 +34,24 @@ void ImpedanceController::initialize(const pinocchio::Model& pinocchio_model,
 
     // initialize the size of the vectors.
     root_jacobian_.resize(6, pinocchio_model_.nv);
+    root_jacobian_.fill(0.);
     end_jacobian_.resize(6, pinocchio_model_.nv);
     end_jacobian_.fill(0.);
-    root_jacobian_.fill(0.);
-
     impedance_jacobian_.resize(6, pinocchio_model_.nv);
+    impedance_jacobian_.fill(0.);
+
+    // Defines if the model has a freeflyer.
+    pinocchio_model_has_free_flyer_ =
+        pinocchio_model_.joints[1].shortname() == "JointModelFreeFlyer";
 
     // output
     torques_.resize(pinocchio_model_.nv, 1);
+    torques_.fill(0.);
+    if(pinocchio_model_has_free_flyer_)
+        joint_torques_.resize(pinocchio_model_.nv, 1);
+    else{
+        joint_torques_.resize(pinocchio_model_.nv - 6, 1);
+    }
 }
 
 void ImpedanceController::run(
@@ -113,21 +123,27 @@ void ImpedanceController::run(
     impedance_jacobian_ = end_jacobian_ - root_jacobian_;
 
     // compute the output torques
-    torques_ = impedance_jacobian_.transpose() * impedance_force_;
+    torques_ = (impedance_jacobian_.transpose() * impedance_force_);
+    
+    if(pinocchio_model_has_free_flyer_)
+        joint_torques_ = torques_.tail(pinocchio_model_.nv - 6);
+    else{
+        joint_torques_ = torques_;
+    }
     return;
 }
 
-Eigen::VectorXd& ImpedanceController::get_torques()
+const Eigen::VectorXd& ImpedanceController::get_torques()
 {
-    /// @todo get joint torque here,
-    /// automatically determine if we need to remove the free_flyer or not
-
-    // model.joint[1].shortname()
-    // model.names[1] == "root_joint"
     return torques_;
 }
 
-ImpedanceController::Vector6d& ImpedanceController::get_impedance_force()
+const Eigen::VectorXd& ImpedanceController::get_joint_torques()
+{
+    return joint_torques_;
+}
+
+const ImpedanceController::Vector6d& ImpedanceController::get_impedance_force()
 {
     return impedance_force_;
 }
