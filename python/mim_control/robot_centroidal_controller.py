@@ -107,7 +107,7 @@ class RobotCentroidalController:
         """Computes the forces needed to generated a desired centroidal wrench.
         Args:
             q: Generalized robot position configuration.
-            q: Generalized robot velocity configuration.
+            dq: Generalized robot velocity configuration.
             cnt_array: Array with {0, 1} of #endeffector size indicating if
                 an endeffector is in contact with the ground or not. Forces are
                 only computed for active endeffectors.

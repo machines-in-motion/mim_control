@@ -4,8 +4,8 @@
  * @copyright Copyright (c) 2020, New York University and Max Planck
  * Gesellschaft
  *
- * @brief Implements a qp allocating forces to track a desired centroidal
- * wrench.
+ * @brief Implements a qp allocating forces to the contact points to track a
+ * desired centroidal wrench.
  *
  */
 
@@ -20,13 +20,16 @@ typedef Eigen::Array<double, 6, 1> Array6d;
 typedef Eigen::Matrix<double, 6, 1> Vector6d;
 
 /**
- * @brief Impedance controller between any two frames of the robot.
+ * @brief Allocates forces to the contact points to track a desired centroidal
+ * wrench.
+ * 
+ * @todo write here the math or point to the doc.
  */
 class CentroidalForceQPController
 {
 public:
     /**
-     * @brief Construct a new ImpedanceController object.
+     * @brief Construct a new CentroidalForceQPController object.
      */
     CentroidalForceQPController();
 
