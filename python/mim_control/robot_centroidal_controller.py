@@ -20,7 +20,17 @@ def mat(a):
 
 
 class RobotCentroidalController:
-    def __init__(self, robot_config, mu, kc, dc, kb, db, qp_penalty_lin=3 * [1e6], qp_penalty_ang=3 * [1e6]):
+    def __init__(
+        self,
+        robot_config,
+        mu,
+        kc,
+        dc,
+        kb,
+        db,
+        qp_penalty_lin=3 * [1e6],
+        qp_penalty_ang=3 * [1e6],
+    ):
         """
         Input:
             robot : pinocchio returned robot object

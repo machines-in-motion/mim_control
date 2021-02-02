@@ -81,11 +81,11 @@ void ImpedanceController::run(
 
     // Compute the force to be applied to the environment.
     const pinocchio::SE3 diff = desired_end_frame_placement.actInv(
-            root_placement_.actInv(end_placement_));
-    impedance_force_.head(3) = -gain_proportional.head(3) *
-            diff.translation().array();
-    impedance_force_.tail(3) = -gain_proportional.tail(3) *
-            pinocchio::log3(diff.rotation()).array();
+        root_placement_.actInv(end_placement_));
+    impedance_force_.head(3) =
+        -gain_proportional.head(3) * diff.translation().array();
+    impedance_force_.tail(3) =
+        -gain_proportional.tail(3) * pinocchio::log3(diff.rotation()).array();
 
     impedance_force_ += (gain_derivative * (desired_end_frame_velocity -
                                             (end_velocity_ - root_velocity_))

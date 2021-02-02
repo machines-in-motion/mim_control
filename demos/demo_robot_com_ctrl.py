@@ -79,7 +79,7 @@ elif bolt:
         kb=[100, 100, 100],
         db=[10.0, 10.0, 10.0],
         qp_penalty_lin=[1, 1, 1e6],
-        qp_penalty_ang=[1e6, 1e6, 1]
+        qp_penalty_ang=[1e6, 1e6, 1],
     )
 robot_leg_ctrl = RobotImpedanceController(robot, config_file)
 
