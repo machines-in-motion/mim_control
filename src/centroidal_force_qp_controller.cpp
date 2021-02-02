@@ -103,7 +103,7 @@ void CentroidalForceQPController::run(
     {
         double x = relative_position_endeff(3 * i);
         double y = relative_position_endeff(3 * i + 1);
-        double z = 0;  // Always assumed to be on the floor.
+        double z = relative_position_endeff(3 * i + 2);
         ce_new_.block<3, 3>(3, 3 * i) << 0, z, -y, -z, 0, x, y, -x, 0;
     }
 
