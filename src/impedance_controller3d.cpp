@@ -4,21 +4,21 @@
  * @copyright Copyright (c) 2020, New York University and Max Planck
  * Gesellschaft
  *
- * @brief Implementation of the ImpedanceController class.
+ * @brief Implementation of the ImpedanceController3D class.
  */
 
-#include "mim_control/impedance_controller.hpp"
+#include "mim_control/impedance_controller3d.hpp"
 #include "pinocchio/algorithm/frames.hpp"
 
 namespace mim_control
 {
-ImpedanceController::ImpedanceController()
+ImpedanceController3D::ImpedanceController3D()
 {
 }
 
-void ImpedanceController::initialize(const pinocchio::Model& pinocchio_model,
-                                     const std::string& root_frame_name,
-                                     const std::string& end_frame_name)
+void ImpedanceController3D::initialize(const pinocchio::Model& pinocchio_model,
+                                       const std::string& root_frame_name,
+                                       const std::string& end_frame_name)
 {
     // Copy the arguments internally.
     pinocchio_model_ = pinocchio_model;
@@ -55,11 +55,11 @@ void ImpedanceController::initialize(const pinocchio::Model& pinocchio_model,
     }
 }
 
-void ImpedanceController::run(
+void ImpedanceController3D::run(
     Eigen::Ref<const Eigen::VectorXd> robot_configuration,
     Eigen::Ref<const Eigen::VectorXd> robot_velocity,
-    Eigen::Ref<const Array6d> gain_proportional,
-    Eigen::Ref<const Array6d> gain_derivative,
+    Eigen::Ref<const Eigen::Array3d> gain_proportional,
+    Eigen::Ref<const Eigen::Array3d> gain_derivative,
     const double& gain_feed_forward_force,
     const pinocchio::SE3& desired_end_frame_placement,
     const pinocchio::Motion& desired_end_frame_velocity,
@@ -90,23 +90,20 @@ void ImpedanceController::run(
                                                 end_frame_index_,
                                                 pinocchio::LOCAL_WORLD_ALIGNED);
 
+    // End position and velocity relative to the root.
+    root_p_end_ = end_placement_.translation() - root_placement_.translation();
+    root_v_end_ = end_velocity_.linear() - root_velocity_.linear();
+
+    // Errors computation.
+    position_error_ = desired_end_frame_placement.translation() - root_p_end_;
+    velocity_error_ = desired_end_frame_velocity.linear() - root_v_end_;
+
     // Compute the force to be applied to the environment.
-    const pinocchio::SE3 diff = desired_end_frame_placement.actInv(
-        root_placement_.actInv(end_placement_));
-    impedance_force_.head(3) =
-        -gain_proportional.head(3) * diff.translation().array();
-    impedance_force_.tail(3) =
-        -gain_proportional.tail(3) * pinocchio::log3(diff.rotation()).array();
+    impedance_force_ = -gain_proportional.head(3) * position_error_.array();
+    impedance_force_ -= (gain_derivative * velocity_error_.array()).matrix();
 
-    impedance_force_ += (gain_derivative * (desired_end_frame_velocity -
-                                            (end_velocity_ - root_velocity_))
-                                               .toVector()
-                                               .array())
-                            .matrix();
-
-    impedance_force_ -=
-        (gain_feed_forward_force * feed_forward_force.toVector().array())
-            .matrix();
+    impedance_force_ +=
+        gain_feed_forward_force * feed_forward_force.linear();
 
     // Compute the jacobians
     pinocchio::computeJointJacobians(
@@ -121,10 +118,10 @@ void ImpedanceController::run(
                                 root_frame_index_,
                                 pinocchio::LOCAL_WORLD_ALIGNED,
                                 root_jacobian_);
-    impedance_jacobian_ = end_jacobian_ - root_jacobian_;
+    impedance_jacobian_ = end_jacobian_;  // - root_jacobian_;
 
     // compute the output torques
-    torques_ = (impedance_jacobian_.transpose() * impedance_force_);
+    torques_ = - impedance_jacobian_.topRows(3).transpose() * impedance_force_;
 
     if (pinocchio_model_has_free_flyer_)
         joint_torques_ = torques_.tail(pinocchio_model_.nv - 6);
@@ -135,17 +132,17 @@ void ImpedanceController::run(
     return;
 }
 
-const Eigen::VectorXd& ImpedanceController::get_torques()
+const Eigen::VectorXd& ImpedanceController3D::get_torques()
 {
     return torques_;
 }
 
-const Eigen::VectorXd& ImpedanceController::get_joint_torques()
+const Eigen::VectorXd& ImpedanceController3D::get_joint_torques()
 {
     return joint_torques_;
 }
 
-const ImpedanceController::Vector6d& ImpedanceController::get_impedance_force()
+const Eigen::Vector3d& ImpedanceController3D::get_impedance_force()
 {
     return impedance_force_;
 }
