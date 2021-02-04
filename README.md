@@ -1,10 +1,11 @@
-# BLMC Controllers
+Readme
+------
 
-## What it is
+### What it is
 
 This packages contains generic controllers that can be used for a biped, quadruped, hopper and any other robot. The controllers are created based on the nature of the robot and its properties such as number of end effectors etc..
 
-## Dependencies
+### Dependencies
 ```
 - Pinocchio
 - PyBullet
@@ -13,14 +14,24 @@ This packages contains generic controllers that can be used for a biped, quadrup
 - Robot_Properties_Solo (Optional, needed to run demos)
 - Robot_Properties_Bolt (Optional, needed to run demos)
 ```
-## Installation
+### Installation
+
+External dependencies:
+See [this tutorial](https://github.com/machines-in-motion/machines-in-motion.github.io/wiki/laas_package_from_binaries)
+in order to install `eiquadprog` and `pinocchio`.
+See [treep](https://gitlab.is.tue.mpg.de/amd-clmc/treep) and [colcon](https://github.com/machines-in-motion/machines-in-motion.github.io/wiki/use_colcon) for their usage.
+
+Local and specific dependencies and the actual repo we need to compile:
 ```
-git clone git@github.com:avadesh02/mim_control.git
-cd mim_control
-pip3 install .
+mkdir devel
+cd devel
+git clone git@github.com:machines-in-motion/treep_machines_in_motion
+pip install -U treep
+treep --clone MIM_CONTROL
+colcon build
 ```
 
-## Running Demos
+### Running Demos
 To run the impedance controller on Solo12 follow the below mentioned steps 
 ```
 source /opt/openrobots/setup.bash (source open robots)
@@ -35,12 +46,12 @@ cd demo
 python3 demo_robot_com_ctrl.py
 ```
 
-## Authors
+### Authors
 - Avadesh Meduri
 - Paarth Shaah 
 - Julian Viereck
 
-## Cite
+### Cite
 ```
 @article{grimminger2020open,
   title={An open torque-controlled modular robot architecture for legged locomotion research},
@@ -54,11 +65,11 @@ python3 demo_robot_com_ctrl.py
 }
 ```
 
-## Copyrights
+### Copyrights
 
 Copyright(c) 2019-2020 New York University, Max Planck Gesellschaft
 
-## License
+### License
 
 BSD 3-Clause License
 
