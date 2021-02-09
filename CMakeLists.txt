@@ -35,7 +35,17 @@ find_package(Eigen3 REQUIRED)
 find_package(pinocchio REQUIRED)
 find_package(eiquadprog REQUIRED)
 
+# Specific search of boost python as it is yet not trivial.
 search_for_boost_python()
+
+# Optionnal
+find_package(dynamic-graph QUIET)
+find_package(dynamic-graph-python QUIET)
+
+set(build_dynamic_graph_plugins FALSE)
+if(${dynamic-graph_FOUND} AND ${dynamic-graph-python_FOUND})
+  set(build_dynamic_graph_plugins TRUE)
+endif()
 
 #
 # Create the main library
@@ -54,6 +64,41 @@ target_link_libraries(${PROJECT_NAME} yaml_utils::yaml_utils)
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include>)
+
+#
+# Build the dynamic graph plugins if the dependencies are found.
+#
+if(${build_dynamic_graph_plugins})
+  # plugin name
+  set(plugin_name wbc)
+  # Create the library
+  add_library(
+    ${plugin_name} SHARED
+    src/dynamic_graph/impedance_controller.cpp
+    src/dynamic_graph/centroidal_pd_controller.cpp
+    src/dynamic_graph/centroidal_force_qp_controller.cpp)
+  # Add the include dependencies.
+  target_include_directories(
+    ${plugin_name} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                          $<INSTALL_INTERFACE:include>)
+  # Link the dependencies.
+  target_link_libraries(${plugin_name} ${PROJECT_NAME})
+  target_link_libraries(${plugin_name} dynamic-graph::dynamic-graph)
+  target_link_libraries(${plugin_name}
+                        dynamic-graph-python::dynamic-graph-python)
+  # Install the target and it's python bindings.
+  install_dynamic_graph_plugin_python_bindings(${plugin_name})
+  # Install the plugin.
+  get_dynamic_graph_plugin_install_path(plugin_install_path)
+  install(
+    TARGETS ${plugin_name}
+    EXPORT ${PROJECT_NAME}Targets
+    LIBRARY DESTINATION ${plugin_install_path}
+    ARCHIVE DESTINATION ${plugin_install_path}
+    RUNTIME DESTINATION ${plugin_install_path}
+    INCLUDES
+    DESTINATION include)
+endif()
 
 #
 # Install the package
