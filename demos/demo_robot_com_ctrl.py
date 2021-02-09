@@ -24,7 +24,7 @@ def demo(robot_name):
     if robot_name == "solo":
         robot = env.add_robot(Solo12Robot)
         robot_config = Solo12Config()
-        mu = 0.6
+        mu = 0.2
         kc = [200, 200, 200]
         dc = [5, 5, 5]
         kb = [200, 200, 200]
@@ -34,7 +34,7 @@ def demo(robot_name):
     elif robot_name == "bolt":
         robot = env.add_robot(BoltRobot)
         robot_config = BoltConfig()
-        mu = 0.6
+        mu = 0.2
         kc = [0, 0, 100]
         dc = [0, 0, 10]
         kb = [100, 100, 100]
@@ -52,6 +52,7 @@ def demo(robot_name):
 
     # Reset the robot to some initial state.
     q0 = np.matrix(robot_config.initial_configuration).T
+    q0[0] = 0.0
     dq0 = np.matrix(robot_config.initial_velocity).T
     robot.reset_state(q0, dq0)
 

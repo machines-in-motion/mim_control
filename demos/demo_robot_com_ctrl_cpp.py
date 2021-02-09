@@ -28,23 +28,23 @@ def demo(robot_name):
     if robot_name == "solo":
         robot = env.add_robot(Solo12Robot)
         robot_config = Solo12Config()
-        mu = 0.6
+        mu = 0.2
         kc = [200, 200, 200]
         dc = [50, 50, 50]
         kb = [100, 100, 200]
         db = [50.0, 50.0, 200.0]
-        qp_penalty_lin = 3 * [1e6]
-        qp_penalty_ang = 3 * [1e6]
+        qp_penalty_lin = 5e5
+        qp_penalty_ang = 1e6
     elif robot_name == "bolt":
         robot = env.add_robot(BoltRobot)
         robot_config = BoltConfig()
-        mu = 0.6
+        mu = 0.2
         kc = [0, 0, 100]
         dc = [0, 0, 10]
         kb = [100, 100, 100]
         db = [10.0, 10.0, 10.0]
-        qp_penalty_lin = [1, 1, 1e6]
-        qp_penalty_ang = [1e6, 1e6, 1]
+        qp_penalty_lin = 1e6  # [1, 1, 1e6]
+        qp_penalty_ang = 1e6  # [1e6, 1e6, 1]
     else:
         raise RuntimeError(
             "Robot name [" + str(robot_name) + "] unknown. "
@@ -72,7 +72,7 @@ def demo(robot_name):
         2.5, np.diag(robot.pin_robot.mass(q_init)[3:6, 3:6])
     )
     force_qp = CentroidalForceQPController()
-    force_qp.initialize(4, 0.2, 5e5, 1e6)
+    force_qp.initialize(robot.nb_ee, mu, qp_penalty_lin, qp_penalty_ang)
 
     # Reset the robot to some initial state.
     q0 = np.matrix(robot_config.initial_configuration).T
