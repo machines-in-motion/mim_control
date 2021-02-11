@@ -17,7 +17,7 @@ CentroidalPDController::CentroidalPDController()
 }
 
 void CentroidalPDController::initialize(
-    double& mass, Eigen::Ref<const Eigen::Vector3d> inertia)
+    const double& mass, Eigen::Ref<const Eigen::Vector3d> inertia)
 {
     mass_ = mass;
     inertia_ = inertia;

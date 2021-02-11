@@ -4,16 +4,16 @@
  * @copyright Copyright (c) 2020, New York University and Max Planck
  * Gesellschaft
  *
- * @brief This is the implementation for impedance controller between any two
- * frames of the robot.
+ * @brief Dynamic graph wrapper around the ImpedanceController class.
  *
  */
 
 #pragma once
 
+#include "mim_control/impedance_controller.hpp"
 #include "dynamic-graph/all-signals.h"
 #include "dynamic-graph/entity.h"
-#include "mim_control/impedance_controller.hpp"
+
 
 namespace mim_control
 {
@@ -80,9 +80,6 @@ public:
      * Output Signals.
      */
 
-    /** @brief Internal transition signal. */
-    dynamicgraph::SignalTimeDependent<bool, int> one_iteration_sout_;
-
     /** @brief Output joint torques. */
     dynamicgraph::SignalTimeDependent<dynamicgraph::Vector, int> torque_sout_;
 
@@ -93,6 +90,9 @@ public:
     /** @brief Impedance forces computed. */
     dynamicgraph::SignalTimeDependent<dynamicgraph::Vector, int>
         impedance_force_;
+
+    /** @brief Internal transition signal. */
+    dynamicgraph::SignalTimeDependent<bool, int> one_iteration_sout_;
 
 protected:
     /**
@@ -108,27 +108,44 @@ protected:
     /**
      * @brief Callback function of the joint_torque_sout_ signal.
      *
-     * @param joint_torque
+     * @param signal_data
      * @param time
      * @return dynamicgraph::Vector&
      */
     dynamicgraph::Vector& joint_torque_callback(
-        dynamicgraph::Vector& joint_torque, int time);
+        dynamicgraph::Vector& signal_data, int time);
 
     /**
      * @brief Callback function of the impedance_force_sout_ signal.
      *
-     * @param impedance_force
+     * @param signal_data
      * @param time
      * @return dynamicgraph::Vector&
      */
     dynamicgraph::Vector& impedance_force_callback(
-        dynamicgraph::Vector& impedance_force, int time);
+        dynamicgraph::Vector& signal_data, int time);
 
     /**
      * @brief Internally calls the ImpedanceController class.
+     * 
+     * @param signal_data 
+     * @param time 
+     * @return true 
+     * @return false 
      */
-    bool& one_iteration(bool& dummy, int& time);
+    bool& one_iteration_callback(bool& signal_data, int time);
+
+    /** @brief Actual controller class we wrap around. */
+    mim_control::ImpedanceController impedance_controller_;
+
+    /** @brief Used for type conversion. */
+    pinocchio::SE3 desired_end_frame_placement_;
+
+    /** @brief Used for type conversion. */
+    pinocchio::Motion desired_end_frame_velocity_;
+
+    /** @brief Used for type conversion. */
+    pinocchio::Force feed_forward_force_;
 };
 
 }  // namespace dynamic_graph

@@ -4,79 +4,114 @@
  * @copyright Copyright (c) 2020, New York University and Max Planck
  * Gesellschaft
  *
- * @brief Implements a PD controller at the center of mass.
+ * @brief Dynamic graph wrapper around the CentroidalPDController class.
  *
  */
 
 #pragma once
 
-#include <Eigen/Dense>
+#include "dynamic-graph/all-signals.h"
+#include "dynamic-graph/entity.h"
+#include "mim_control/centroidal_pd_controller.hpp"
+#include "mim_control/dynamic_graph/signal_utils.hpp"
+#include "pinocchio/fwd.hpp"
 
 namespace mim_control
 {
-typedef Eigen::Array<double, 6, 1> Array6d;
-typedef Eigen::Matrix<double, 6, 1> Vector6d;
-
-/**
- * @brief Impedance controller between any two frames of the robot.
- */
-class CentroidalPDController
+namespace dynamic_graph
 {
+/**
+ * @brief Entity around the CentroidalPDController class of this package.
+ */
+class CentroidalPDController : public dynamicgraph::Entity
+{
+    DYNAMIC_GRAPH_ENTITY_DECL();
+
 public:
     /**
-     * @brief Construct a new ImpedanceController object.
+     * @brief Construct a new CentroidalPDController object using its Dynamic
+     * Graph name.
+     *
+     * @param name
      */
-    CentroidalPDController();
+    CentroidalPDController(const std::string& name);
 
     /**
      * @brief Initialize the internal data. None real-time safe method.
      *
-     * @param inertia Inertia of the base.
+     * @param pinocchio_model rigid body model of the robot
+     * @param root_frame_name root frame name where the spring starts(Ex. Hip)
+     * @param end_frame_name frame name where the spring ends(Ex. end effector)
      */
-    void initialize(double& mass, Eigen::Ref<const Eigen::Vector3d> inertia);
+    void initialize(const double& mass, const dynamicgraph::Vector& inertia);
 
-    /**
-     * Computes the centroidal wrench using a PD controller.
+    /*
+     * Input Signals.
      */
-    void run(Eigen::Ref<const Eigen::Vector3d> kc,
-             Eigen::Ref<const Eigen::Vector3d> dc,
-             Eigen::Ref<const Eigen::Vector3d> kb,
-             Eigen::Ref<const Eigen::Vector3d> db,
-             Eigen::Ref<const Eigen::Vector3d> com,
-             Eigen::Ref<const Eigen::Vector3d> com_des,
-             Eigen::Ref<const Eigen::Vector3d> vcom,
-             Eigen::Ref<const Eigen::Vector3d> vcom_des,
-             Eigen::Ref<const Eigen::Vector4d> ori,
-             Eigen::Ref<const Eigen::Vector4d> ori_des,
-             Eigen::Ref<const Eigen::Vector3d> angvel,
-             Eigen::Ref<const Eigen::Vector3d> angvel_des);
 
+    /** @brief Proportional gain on the center of mass tracking error. */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> kp_com_sin_;
+
+    /** @brief Derivative gain on the center of mass tracking error. */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> kd_com_sin_;
+
+    /** @brief Proportional gain on the base orientation tracking error. */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> kp_base_sin_;
+
+    /** @brief Derivative gain on the base orientation tracking error. */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> kd_base_sin_;
+
+    /** @brief Current position of the center of mass. */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> actual_com_position_sin_;
+
+    /** @brief */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int>
+        desired_com_position_sin_;
+
+    /** @brief */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> actual_com_velocity_sin_;
+
+    /** @brief */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int>
+        desired_com_velocity_sin_;
+
+    /** @brief */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int>
+        actual_base_orientation_sin_;
+
+    /** @brief */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int>
+        desired_base_orientation_sin_;
+
+    /** @brief */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int>
+        actual_base_angular_velocity_sin_;
+
+    /** @brief */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int>
+        desired_base_angular_velocity_sin_;
+
+    /*
+     * Output Signals.
+     */
+
+    /** @brief Output joint torques. */
+    dynamicgraph::SignalTimeDependent<dynamicgraph::Vector, int> wrench_sout_;
+
+protected:
     /**
-     * @brief Get the computed wrench from the PD controller.
+     * @brief Callback function of the torque_sout_ signal.
      *
-     * @return Eigen::VectorXd&
+     * @param torque
+     * @param time
+     * @return dynamicgraph::Vector&
      */
-    Vector6d& get_wrench();
+    dynamicgraph::Vector& wrench_callback(dynamicgraph::Vector& signal_data,
+                                          int time);
 
-private:  // attributes
-    /** @brief Output wrench */
-    Vector6d wrench_;
-
-    double mass_;
-    Eigen::Vector3d inertia_;
-
-    Eigen::Vector3d pos_error_;
-    Eigen::Vector3d vel_error_;
-    Eigen::Vector3d ori_error_;
-
-    Eigen::Quaternion<double> ori_quat_;
-    Eigen::Quaternion<double> des_ori_quat_;
-    Eigen::Quaternion<double> ori_error_quat_;
-
-    Eigen::Matrix<double, 3, 3> ori_se3_;
-    Eigen::Matrix<double, 3, 3> des_ori_se3_;
-    Eigen::Matrix<double, 3, 3>
-        ori_error_se3_;  // refer to christian ott paper for definitions (Rdb)
+    /** @brief Actual controller class we wrap around. */
+    mim_control::CentroidalPDController centroidal_pd_controller_;
 };
 
+}  // namespace dynamic_graph
 }  // namespace mim_control

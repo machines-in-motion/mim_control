@@ -4,92 +4,117 @@
  * @copyright Copyright (c) 2020, New York University and Max Planck
  * Gesellschaft
  *
- * @brief Implements a PD controller at the center of mass.
- *
+ * @brief Dynamic graph wrapper around the CentroidalPDController class.
  */
 
-#include "mim_control/centroidal_pd_controller.hpp"
+#include "mim_control/dynamic_graph/centroidal_pd_controller.hpp"
+
+#include "dynamic-graph/all-commands.h"
+#include "dynamic-graph/factory.h"
 
 namespace mim_control
 {
-CentroidalPDController::CentroidalPDController()
+namespace dynamic_graph
 {
+using ::dynamicgraph::command::docCommandVoid2;
+using ::dynamicgraph::command::makeCommandVoid2;
+
+DYNAMICGRAPH_FACTORY_ENTITY_PLUGIN(CentroidalPDController,
+                                   "CentroidalPDController");
+
+CentroidalPDController::CentroidalPDController(const std::string& name)
+    :  // Inheritance.
+      dynamicgraph::Entity(name),
+      // Input signals.
+      define_input_signal(kp_com_sin_, "Vector3d"),
+      define_input_signal(kd_com_sin_, "Vector3d"),
+      define_input_signal(kp_base_sin_, "Vector3d"),
+      define_input_signal(kd_base_sin_, "Vector3d"),
+      define_input_signal(actual_com_position_sin_, "Vector3d"),
+      define_input_signal(desired_com_position_sin_, "Vector3d"),
+      define_input_signal(actual_com_velocity_sin_, "Vector3d"),
+      define_input_signal(desired_com_velocity_sin_, "Vector3d"),
+      define_input_signal(actual_base_orientation_sin_, "Vector7d_quat"),
+      define_input_signal(desired_base_orientation_sin_, "Vector7d_quat"),
+      define_input_signal(actual_base_angular_velocity_sin_, "Vector3d"),
+      define_input_signal(desired_base_angular_velocity_sin_, "Vector3d"),
+      // Output signals.
+      define_output_signal(
+          wrench_sout_,
+          "inner",
+          kp_com_sin_ << kd_com_sin_ << kp_base_sin_ << kd_base_sin_
+                      << actual_com_position_sin_ << desired_com_position_sin_
+                      << actual_com_velocity_sin_ << desired_com_velocity_sin_
+                      << actual_base_orientation_sin_
+                      << desired_base_orientation_sin_
+                      << actual_base_angular_velocity_sin_
+                      << desired_base_angular_velocity_sin_,
+          &CentroidalPDController::wrench_callback)
+{
+    signalRegistration(kp_com_sin_
+                       << kd_com_sin_ << kp_base_sin_ << kd_base_sin_
+                       << actual_com_position_sin_ << desired_com_position_sin_
+                       << actual_com_velocity_sin_ << desired_com_velocity_sin_
+                       << actual_base_orientation_sin_
+                       << desired_base_orientation_sin_
+                       << actual_base_angular_velocity_sin_
+                       << desired_base_angular_velocity_sin_ << wrench_sout_);
+
+    addCommand("initialize",
+               makeCommandVoid2(
+                   *this,
+                   &CentroidalPDController::initialize,
+                   docCommandVoid2("Initialize the CentroidalPDController.",
+                                   "Robot total mass.",
+                                   "Base inertia.")));
 }
 
-void CentroidalPDController::initialize(
-    double& mass, Eigen::Ref<const Eigen::Vector3d> inertia)
+void CentroidalPDController::initialize(const double& mass,
+                                        const dynamicgraph::Vector& inertia)
 {
-    mass_ = mass;
-    inertia_ = inertia;
+    centroidal_pd_controller_.initialize(mass, inertia);
 }
 
-void CentroidalPDController::run(Eigen::Ref<const Eigen::Vector3d> kc,
-                                 Eigen::Ref<const Eigen::Vector3d> dc,
-                                 Eigen::Ref<const Eigen::Vector3d> kb,
-                                 Eigen::Ref<const Eigen::Vector3d> db,
-                                 Eigen::Ref<const Eigen::Vector3d> com,
-                                 Eigen::Ref<const Eigen::Vector3d> com_des,
-                                 Eigen::Ref<const Eigen::Vector3d> vcom,
-                                 Eigen::Ref<const Eigen::Vector3d> vcom_des,
-                                 Eigen::Ref<const Eigen::Vector4d> ori,
-                                 Eigen::Ref<const Eigen::Vector4d> ori_des,
-                                 Eigen::Ref<const Eigen::Vector3d> angvel,
-                                 Eigen::Ref<const Eigen::Vector3d> angvel_des)
+dynamicgraph::Vector& CentroidalPDController::wrench_callback(
+    dynamicgraph::Vector& signal_data, int time)
 {
-    /*************************************************************************/
-    // Compute the linear part of the wrench.
+    const dynamicgraph::Vector& kp_com = kp_com_sin_.access(time);
+    const dynamicgraph::Vector& kd_com = kd_com_sin_.access(time);
+    const dynamicgraph::Vector& kp_base = kp_base_sin_.access(time);
+    const dynamicgraph::Vector& kd_base = kd_base_sin_.access(time);
+    const dynamicgraph::Vector& actual_com_position =
+        actual_com_position_sin_.access(time);
+    const dynamicgraph::Vector& desired_com_position =
+        desired_com_position_sin_.access(time);
+    const dynamicgraph::Vector& actual_com_velocity =
+        actual_com_velocity_sin_.access(time);
+    const dynamicgraph::Vector& desired_com_velocity =
+        desired_com_velocity_sin_.access(time);
+    const dynamicgraph::Vector& actual_base_orientation =
+        actual_base_orientation_sin_.access(time);
+    const dynamicgraph::Vector& desired_base_orientation =
+        desired_base_orientation_sin_.access(time);
+    const dynamicgraph::Vector& actual_base_angular_velocity =
+        actual_base_angular_velocity_sin_.access(time);
+    const dynamicgraph::Vector& desired_base_angular_velocity =
+        desired_base_angular_velocity_sin_.access(time);
 
-    /*---------- computing position error ----*/
-    pos_error_.array() = com_des.array() - com.array();
-    vel_error_.array() = vcom_des.array() - vcom.array();
-    /*---------- computing tourques ----*/
+    centroidal_pd_controller_.run(kp_com,
+                                  kd_com,
+                                  kp_base,
+                                  kd_base,
+                                  actual_com_position,
+                                  desired_com_position,
+                                  actual_com_velocity,
+                                  desired_com_velocity,
+                                  actual_base_orientation,
+                                  desired_base_orientation,
+                                  actual_base_angular_velocity,
+                                  desired_base_angular_velocity);
 
-    wrench_.head<3>().array() = mass_ * (pos_error_.array() * kc.array() +
-                                         vel_error_.array() * dc.array());
-
-    /*************************************************************************/
-    // Compute the angular part of the wrench.
-    des_ori_quat_.w() = ori_des[3];
-    des_ori_quat_.vec()[0] = ori_des[0];
-    des_ori_quat_.vec()[1] = ori_des[1];
-    des_ori_quat_.vec()[2] = ori_des[2];
-
-    ori_quat_.w() = ori[3];
-    ori_quat_.vec()[0] = ori[0];
-    ori_quat_.vec()[1] = ori[1];
-    ori_quat_.vec()[2] = ori[2];
-
-    des_ori_se3_ = des_ori_quat_.toRotationMatrix();
-    ori_se3_ = ori_quat_.toRotationMatrix();
-
-    ori_error_se3_ = des_ori_se3_.transpose() * ori_se3_;
-    ori_error_quat_ = ori_error_se3_;
-
-    // todo: multiply as matrix
-
-    ori_error_[0] =
-        -2.0 * ((ori_error_quat_.w() * ori_error_quat_.vec()[0] * kb[0]) +
-                (kb[2] - kb[1]) *
-                    (ori_error_quat_.vec()[1] * ori_error_quat_.vec()[2]));
-    ori_error_[1] =
-        -2.0 * ((ori_error_quat_.w() * ori_error_quat_.vec()[1] * kb[1]) +
-                (kb[0] - kb[2]) *
-                    (ori_error_quat_.vec()[0] * ori_error_quat_.vec()[2]));
-    ori_error_[2] =
-        -2.0 * ((ori_error_quat_.w() * ori_error_quat_.vec()[2] * kb[2]) +
-                (kb[1] - kb[0]) *
-                    (ori_error_quat_.vec()[1] * ori_error_quat_.vec()[0]));
-
-    /*---------- computing ang error ----*/
-
-    wrench_.tail<3>().array() =
-        db.array() * inertia_.array() * (angvel_des.array() - angvel.array()) +
-        ori_error_.array();
+    signal_data = centroidal_pd_controller_.get_wrench();
+    return signal_data;
 }
 
-Vector6d& CentroidalPDController::get_wrench()
-{
-    return wrench_;
-}
-
+}  // namespace dynamic_graph
 }  // namespace mim_control
