@@ -4,34 +4,36 @@
  * @copyright Copyright (c) 2020, New York University and Max Planck
  * Gesellschaft
  *
- * @brief Implements a qp allocating forces to the contact points to track a
- * desired centroidal wrench.
+ * @brief Dynamic graph wrapper around the CentroidalForceQPController class.
  *
  */
 
 #pragma once
 
-#include <Eigen/Dense>
-#include <eiquadprog/eiquadprog-fast.hpp>
+#include "mim_control/centroidal_force_qp_controller.hpp"
+#include "dynamic-graph/all-signals.h"
+#include "dynamic-graph/entity.h"
+
 
 namespace mim_control
 {
-typedef Eigen::Array<double, 6, 1> Array6d;
-typedef Eigen::Matrix<double, 6, 1> Vector6d;
-
-/**
- * @brief Allocates forces to the contact points to track a desired centroidal
- * wrench.
- * 
- * @todo write here the math or point to the doc.
- */
-class CentroidalForceQPController
+namespace dynamic_graph
 {
+/**
+ * @brief Entity around the CentroidalForceQPController class of this package.
+ */
+class CentroidalForceQPController : public dynamicgraph::Entity
+{
+    DYNAMIC_GRAPH_ENTITY_DECL();
+
 public:
     /**
-     * @brief Construct a new CentroidalForceQPController object.
+     * @brief Construct a new CentroidalForceQPController object using its Dynamic Graph
+     * name.
+     *
+     * @param name
      */
-    CentroidalForceQPController();
+    CentroidalForceQPController(const std::string& name);
 
     /**
      * @brief Initialize the internal data. None real-time safe method.
@@ -46,45 +48,40 @@ public:
                     double qp_penalty_lin,
                     double qp_penalty_ang);
 
-    /**
-     * @brief Computes the centroidal wrench using a PD controller.
-     *
-     * @param w_com The desired centroidal wrench to track.
-     * @param relative_position_endeff The relative position of the endeffectors
-     *     with respect to the center of mass.
+    /*
+     * Input Signals.
      */
-    void run(Eigen::Ref<const Vector6d> w_com,
-             Eigen::Ref<const Eigen::VectorXd> relative_position_endeff,
-             Eigen::Ref<const Eigen::VectorXd> cnt_array);
 
-    /**
-     * @brief Get the computed desired forces
-     *
-     * @return Eigen::VectorXd&
+    /** @brief Robot generalized coordinates (q). */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> w_com_sin_;
+
+    /** @brief Robot generalized velocity (dq). */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> relative_position_endeff_sin_;
+
+    /** @brief Proportional gain from the cartesian PD. */
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> cnt_array_sin_;
+
+    /*
+     * Output Signals.
      */
-    Eigen::VectorXd& get_forces();
 
-private:  // attributes
-    /** @brief Output forces */
-    Eigen::VectorXd forces_;
-    Eigen::VectorXd sol_;
+    /** @brief Output joint torques. */
+    dynamicgraph::SignalTimeDependent<dynamicgraph::Vector, int> forces_sout_;
 
-    Eigen::MatrixXd hess_;
-    Eigen::MatrixXd ce_;
-    Eigen::MatrixXd ce_new_;
-    Eigen::MatrixXd ci_;
+protected:
+    /**
+     * @brief Callback function of the forces_sout_ signal.
+     *
+     * @param torque
+     * @param time
+     * @return dynamicgraph::Vector&
+     */
+    dynamicgraph::Vector& forces_callback(dynamicgraph::Vector& torque,
+                                          int time);
 
-    Eigen::VectorXd g0_;
-    Eigen::VectorXd ci0_;
-
-    int nb_eff_;
-
-    double mu_;
-
-    double qp_penalty_lin_;
-    double qp_penalty_ang_;
-
-    eiquadprog::solvers::EiquadprogFast qp_;
+    /** @brief Actual controller class we wrap around. */
+    mim_control::CentroidalForceQPController force_ctrl_;
 };
 
+}  // namespace dynamic_graph
 }  // namespace mim_control

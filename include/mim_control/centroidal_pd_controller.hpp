@@ -33,7 +33,7 @@ public:
      *
      * @param inertia Inertia of the base.
      */
-    void initialize(double& mass, Eigen::Ref<const Eigen::Vector3d> inertia);
+    void initialize(const double& mass, Eigen::Ref<const Eigen::Vector3d> inertia);
 
     /**
      * Computes the centroidal wrench using a PD controller.

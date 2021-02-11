@@ -64,6 +64,15 @@ public:
      */
     Eigen::VectorXd& get_forces();
 
+    /**
+     * @brief Get nb_eff, i.e. the number of end-effectors used.
+     * 
+     * @return int 
+     */
+    int get_nb_eff(){
+        return nb_eff_;
+    }
+
 private:  // attributes
     /** @brief Output forces */
     Eigen::VectorXd forces_;

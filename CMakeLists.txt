@@ -74,9 +74,11 @@ if(${build_dynamic_graph_plugins})
   # Create the library
   add_library(
     ${plugin_name} SHARED
+    src/dynamic_graph/signal_utils.cpp
     src/dynamic_graph/impedance_controller.cpp
     src/dynamic_graph/centroidal_pd_controller.cpp
-    src/dynamic_graph/centroidal_force_qp_controller.cpp)
+    src/dynamic_graph/centroidal_force_qp_controller.cpp
+  )
   # Add the include dependencies.
   target_include_directories(
     ${plugin_name} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

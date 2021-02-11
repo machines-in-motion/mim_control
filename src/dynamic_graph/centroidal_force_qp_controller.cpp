@@ -4,18 +4,39 @@
  * @copyright Copyright (c) 2020, New York University and Max Planck
  * Gesellschaft
  *
- * @brief Implements a PD controller at the center of mass.
- *
+ * @brief Dynamic graph wrapper around the CentroidalForceQPController class.
  */
 
-#include "mim_control/centroidal_force_qp_controller.hpp"
-
-#include <iostream>
+#include "mim_control/dynamic_graph/centroidal_force_qp_controller.hpp"
+#include "mim_control/dynamic_graph/signal_utils.hpp"
+#include "dynamic-graph/all-commands.h"
+#include "dynamic-graph/factory.h"
 
 namespace mim_control
 {
-CentroidalForceQPController::CentroidalForceQPController()
+namespace dynamic_graph
 {
+
+DYNAMICGRAPH_FACTORY_ENTITY_PLUGIN(CentroidalForceQPController,
+                                   "CentroidalForceQPController");
+
+CentroidalForceQPController::CentroidalForceQPController(
+    const std::string& name)
+    :  // Inheritance.
+      dynamicgraph::Entity(name),
+      // Input signals.
+      define_input_signal(w_com_sin_, "Vector3d"),
+      define_input_signal(relative_position_endeff_sin_, "Vector(nb_ee_x_3)d"),
+      define_input_signal(cnt_array_sin_, "Vector(nb_ee)d"),
+      // Output signals.
+      define_output_signal(
+          forces_sout_,
+          "Vector(nb_ee_x_3)d",
+          w_com_sin_ << relative_position_endeff_sin_ << cnt_array_sin_,
+          &CentroidalForceQPController::forces_callback)
+{
+    signalRegistration(w_com_sin_ << relative_position_endeff_sin_
+                                  << cnt_array_sin_ << forces_sout_);
 }
 
 void CentroidalForceQPController::initialize(int number_endeffectors,
@@ -23,112 +44,29 @@ void CentroidalForceQPController::initialize(int number_endeffectors,
                                              double qp_penalty_lin,
                                              double qp_penalty_ang)
 {
-    nb_eff_ = number_endeffectors;
-    mu_ = friction_coeff;
-    qp_penalty_lin_ = qp_penalty_lin;
-    qp_penalty_ang_ = qp_penalty_ang;
-
-    // Resize the problem.
-    qp_.reset(3 * nb_eff_ + 6, 9, 5 * nb_eff_);
-    sol_.resize(3 * nb_eff_ + 6);
-    forces_.resize(3 * nb_eff_);
-    sol_.fill(0.);
-    forces_.fill(0.);
-
-    // The QP solves the following problem.
-    //
-    // min. 0.5 * x' Hess x + g0' x
-    // s.t. CE x + ce0 = 0
-    //      CI x + ci0 >= 0
-
-    hess_.resize(3 * nb_eff_ + 6, 3 * nb_eff_ + 6);
-    g0_.resize(3 * nb_eff_ + 6);
-
-    ce_.resize(6, 3 * nb_eff_ + 6);
-    ce_new_.resize(6, 3 * nb_eff_ + 6);
-
-    ci_.resize(5 * nb_eff_, 3 * nb_eff_ + 6);
-    ci0_.resize(5 * nb_eff_);
-
-    // Simple initializations.
-    g0_.fill(0.);
-    ci_.fill(0.);
-    ci0_.fill(0.);
-    ce_.fill(0.);
-    hess_.setIdentity();
-    hess_ *= 2.;
-
-    // Slack variables weights.
-    hess_.block<3, 3>(3 * nb_eff_, 3 * nb_eff_).setIdentity();
-    hess_.block<3, 3>(3 * nb_eff_, 3 * nb_eff_) *= qp_penalty_lin;
-    hess_.block<3, 3>(3 * nb_eff_ + 3, 3 * nb_eff_ + 3).setIdentity();
-    hess_.block<3, 3>(3 * nb_eff_ + 3, 3 * nb_eff_ + 3) *= qp_penalty_ang;
-
-    // Setup centroidal wrench equality.
-    for (int i = 0; i < nb_eff_; i++)
-    {
-        // Setup the linear part. The angular part with the cross product is
-        // setup in the run() method.
-        ce_.block<3, 3>(0, 3 * i) << -1, 0, 0, 0, -1, 0, 0, 0, -1;
-    }
-
-    // Part of the slack variables.
-    ce_.block<6, 6>(0, 3 * nb_eff_).setIdentity();
-
-    // Setup the friction cone constraints.
-    for (int j = 0; j < nb_eff_; j++)
-    {
-        ci_(5 * j + 0, 3 * j + 0) = -1;  // mu Fz - Fx >= 0
-        ci_(5 * j + 0, 3 * j + 2) = mu_;
-        ci_(5 * j + 1, 3 * j + 0) = 1;  // mu Fz + Fx >= 0
-        ci_(5 * j + 1, 3 * j + 2) = mu_;
-        ci_(5 * j + 2, 3 * j + 1) = -1;  // mu Fz - Fy >= 0
-        ci_(5 * j + 2, 3 * j + 2) = mu_;
-        ci_(5 * j + 3, 3 * j + 1) = 1;  // mu Fz + Fy >= 0
-        ci_(5 * j + 3, 3 * j + 2) = mu_;
-        ci_(5 * j + 4, 3 * j + 2) = 1;  // Fz >= 0
-    }
+    force_ctrl_.initialize(
+        number_endeffectors, friction_coeff, qp_penalty_lin, qp_penalty_ang);
 }
 
-void CentroidalForceQPController::run(
-    Eigen::Ref<const Vector6d> w_com,
-    Eigen::Ref<const Eigen::VectorXd> relative_position_endeff,
-    Eigen::Ref<const Eigen::VectorXd> cnt_array)
+dynamicgraph::Vector& CentroidalForceQPController::forces_callback(
+    dynamicgraph::Vector& signal_data, int time)
 {
-    // Copy the linear part for the centroidal wrench equality.
-    ce_new_ = ce_;
+    const dynamicgraph::Vector& w_com = w_com_sin_.access(time);
+    const dynamicgraph::Vector& relative_position_endeff =
+        relative_position_endeff_sin_.access(time);
+    const dynamicgraph::Vector& cnt_array = cnt_array_sin_.access(time);
 
-    // Setup cross product at the endeffectors.
-    for (int i = 0; i < nb_eff_; i++)
-    {
-        double x = relative_position_endeff(3 * i);
-        double y = relative_position_endeff(3 * i + 1);
-        double z = relative_position_endeff(3 * i + 2);
-        ce_new_.block<3, 3>(3, 3 * i) << 0, z, -y, -z, 0, x, y, -x, 0;
-    }
+    assert(w_com.size() == 6 && "Wrong size of CoM wrench, expected 6.");
+    assert(relative_position_endeff.size() == force_ctrl_.get_nb_eff() * 3 &&
+           "Wrong size of EE position, expected nb_eff * 3.");
+    assert(cnt_array.size() == force_ctrl_.get_nb_eff() &&
+           "Wrong size of contact array.");
 
-    // Deactivate forces not in contact with the ground.
-    for (int i = 0; i < nb_eff_; i++)
-    {
-        if (cnt_array(i) < 0.2)
-        {
-            ce_new_.col(3 * i + 0).setZero();
-            ce_new_.col(3 * i + 1).setZero();
-            ce_new_.col(3 * i + 2).setZero();
-        }
-    }
+    force_ctrl_.run(w_com, relative_position_endeff, cnt_array);
 
-    // Solve the QP.
-    // std::cout << "Solution result: ";
-    // auto status =
-    qp_.solve_quadprog(hess_, g0_, ce_new_, w_com, ci_, ci0_, sol_);
-    // std::cout << status << std::endl;
-    forces_ = sol_.head(3 * nb_eff_);
+    signal_data = force_ctrl_.get_forces();
+    return signal_data;
 }
 
-Eigen::VectorXd& CentroidalForceQPController::get_forces()
-{
-    return forces_;
-}
-
+}  // namespace dynamic_graph
 }  // namespace mim_control
