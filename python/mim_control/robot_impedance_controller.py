@@ -52,6 +52,7 @@ class RobotImpedanceController(ImpedanceController):
                     int(
                         data_in["impedance_controllers"][ctrls]["start_column"]
                     ),
+                    data_in["impedance_controllers"][ctrls]["is_joint_active"]
                 )
             )
 
@@ -69,10 +70,12 @@ class RobotImpedanceController(ImpedanceController):
             xd_des : desired velocities with respect to the root frame
             f : feed forward forces
         """
-        tau = np.zeros(len(self.imp_ctrl_array) * 3)
+        tau = np.zeros(np.sum(len(leg.is_joint_active) for leg in self.imp_ctrl_array[:]))
+        s1 = slice(0, 0)
         for k in range(len(self.imp_ctrl_array)):
             s = slice(3 * k, 3 * (k + 1))
-            tau[s] = self.imp_ctrl_array[k].compute_impedance_torques(
+            s1 = slice(s1.stop , s1.stop + len(self.imp_ctrl_array[k].is_joint_active))
+            tau[s1] = self.imp_ctrl_array[k].compute_impedance_torques(
                 q, dq, kp[s], kd[s], x_des[s], xd_des[s], f[s]
             )
 

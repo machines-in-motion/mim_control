@@ -15,7 +15,7 @@ from pinocchio.utils import zero, eye
 
 class ImpedanceController(object):
     def __init__(
-        self, name, pin_robot, frame_root_name, frame_end_name, start_column
+        self, name, pin_robot, frame_root_name, frame_end_name, start_column, is_joint_active
     ):
 
         """
@@ -38,6 +38,7 @@ class ImpedanceController(object):
             self.frame_end_name
         )
         self.start_column = start_column
+        self.is_joint_active = is_joint_active
 
     def compute_forward_kinematics(self, q):
         """
@@ -141,16 +142,24 @@ class ImpedanceController(object):
         x = self.compute_distance_between_frames(q)
         xd = self.compute_relative_velocity_between_frames(q, dq)
         jac = self.compute_jacobian(q)[
-            :, self.start_column : self.start_column + 3
+            :, self.start_column : self.start_column + len(self.is_joint_active)
         ]
+        jac = jac[:, self.is_joint_active]
 
         # Store force for learning project.
         self.F_ = (
             f + np.matmul(kp, (x - x_des)) + np.matmul(kd, (xd - xd_des).T).T
         )
         tau = -jac.T.dot(self.F_.T)
-
-        return tau
+        final_tau = []
+        j = 0
+        for i in range(len(self.is_joint_active)):
+            if self.is_joint_active[i] == False:
+                final_tau.append(0)
+            else:
+                final_tau.append(tau[j])
+                j += 1
+        return final_tau
 
     def compute_impedance_torques_world(self, q, dq, kp, kd, x_des, xd_des, f):
         """Computes the leg impedance using world coordiante x_des and xd_des.
@@ -186,11 +195,20 @@ class ImpedanceController(object):
         x = self.pin_robot.data.oMf[self.frame_end_idx].translation
         xd = jac.dot(dq)
 
-        jac = jac[:, self.start_column : self.start_column + 3]
+        jac = jac[:, self.start_column : self.start_column + len(self.is_joint_active)]
+        jac = jac[:, self.is_joint_active]
 
         # Store force for learning project.
         self.F_ = f + kp * (x - x_des) + kd * (xd - xd_des)
         tau = -jac.T.dot(self.F_)
+        final_tau = []
+        j = 0
+        for i in range(len(self.is_joint_active)):
+            if self.is_joint_active[i] == False:
+                final_tau.append(0)
+            else:
+                final_tau.append(tau[j])
+                j += 1
         return tau
 
 
@@ -228,6 +246,7 @@ class ImpedanceControllerSolo8(ImpedanceController):
         xd = self.compute_relative_velocity_between_frames(q, dq)
 
         jac = self.compute_jacobian(q)
+        jac = jac[:, self.is_joint_active]
 
         # Store force for learning project.
         self.F_ = f + kp * (x - x_des) + kd * (xd - xd_des)
