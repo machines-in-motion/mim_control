@@ -22,7 +22,7 @@ typedef Eigen::Matrix<double, 6, 1> Vector6d;
 /**
  * @brief Allocates forces to the contact points to track a desired centroidal
  * wrench.
- * 
+ *
  * @todo write here the math or point to the doc.
  */
 class CentroidalForceQPController

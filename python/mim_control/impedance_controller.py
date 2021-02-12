@@ -15,7 +15,13 @@ from pinocchio.utils import zero, eye
 
 class ImpedanceController(object):
     def __init__(
-        self, name, pin_robot, frame_root_name, frame_end_name, start_column, is_joint_active
+        self,
+        name,
+        pin_robot,
+        frame_root_name,
+        frame_end_name,
+        start_column,
+        is_joint_active,
     ):
 
         """
@@ -142,7 +148,8 @@ class ImpedanceController(object):
         x = self.compute_distance_between_frames(q)
         xd = self.compute_relative_velocity_between_frames(q, dq)
         jac = self.compute_jacobian(q)[
-            :, self.start_column : self.start_column + len(self.is_joint_active)
+            :,
+            self.start_column : self.start_column + len(self.is_joint_active),
         ]
         jac = jac[:, self.is_joint_active]
 
@@ -195,7 +202,10 @@ class ImpedanceController(object):
         x = self.pin_robot.data.oMf[self.frame_end_idx].translation
         xd = jac.dot(dq)
 
-        jac = jac[:, self.start_column : self.start_column + len(self.is_joint_active)]
+        jac = jac[
+            :,
+            self.start_column : self.start_column + len(self.is_joint_active),
+        ]
         jac = jac[:, self.is_joint_active]
 
         # Store force for learning project.
@@ -209,7 +219,7 @@ class ImpedanceController(object):
             else:
                 final_tau.append(tau[j])
                 j += 1
-        return tau
+        return final_tau
 
 
 class ImpedanceControllerSolo8(ImpedanceController):

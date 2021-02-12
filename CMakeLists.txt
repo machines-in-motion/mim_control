@@ -12,8 +12,8 @@ project(mim_control)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Some additionnal optimization for the code.
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -fPIC")
+# Some additionnal optimization for the code. set(CMAKE_CXX_FLAGS_RELEASE
+# "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -fPIC")
 
 #
 # Local include module.
