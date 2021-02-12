@@ -256,7 +256,6 @@ class ImpedanceControllerSolo8(ImpedanceController):
         xd = self.compute_relative_velocity_between_frames(q, dq)
 
         jac = self.compute_jacobian(q)
-        jac = jac[:, self.is_joint_active]
 
         # Store force for learning project.
         self.F_ = f + kp * (x - x_des) + kd * (xd - xd_des)
