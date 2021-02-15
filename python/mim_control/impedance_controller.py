@@ -21,7 +21,7 @@ class ImpedanceController(object):
         frame_root_name,
         frame_end_name,
         start_column,
-        is_joint_active,
+        active_joints,
     ):
 
         """
@@ -44,7 +44,7 @@ class ImpedanceController(object):
             self.frame_end_name
         )
         self.start_column = start_column
-        self.is_joint_active = is_joint_active
+        self.active_joints = active_joints
 
     def compute_forward_kinematics(self, q):
         """
@@ -149,9 +149,9 @@ class ImpedanceController(object):
         xd = self.compute_relative_velocity_between_frames(q, dq)
         jac = self.compute_jacobian(q)[
             :,
-            self.start_column : self.start_column + len(self.is_joint_active),
+            self.start_column : self.start_column + len(self.active_joints),
         ]
-        jac = jac[:, self.is_joint_active]
+        jac = jac[:, self.active_joints]
 
         # Store force for learning project.
         self.F_ = (
@@ -160,8 +160,8 @@ class ImpedanceController(object):
         tau = -jac.T.dot(self.F_.T)
         final_tau = []
         j = 0
-        for i in range(len(self.is_joint_active)):
-            if self.is_joint_active[i] == False:
+        for i in range(len(self.active_joints)):
+            if self.active_joints[i] == False:
                 final_tau.append(0)
             else:
                 final_tau.append(tau[j])
@@ -204,17 +204,17 @@ class ImpedanceController(object):
 
         jac = jac[
             :,
-            self.start_column : self.start_column + len(self.is_joint_active),
+            self.start_column : self.start_column + len(self.active_joints),
         ]
-        jac = jac[:, self.is_joint_active]
+        jac = jac[:, self.active_joints]
 
         # Store force for learning project.
         self.F_ = f + kp * (x - x_des) + kd * (xd - xd_des)
         tau = -jac.T.dot(self.F_)
         final_tau = []
         j = 0
-        for i in range(len(self.is_joint_active)):
-            if self.is_joint_active[i] == False:
+        for i in range(len(self.active_joints)):
+            if self.active_joints[i] == False:
                 final_tau.append(0)
             else:
                 final_tau.append(tau[j])
