@@ -22,7 +22,7 @@ typedef Eigen::Matrix<double, 6, 1> Vector6d;
 /**
  * @brief Allocates forces to the contact points to track a desired centroidal
  * wrench.
- * 
+ *
  * @todo write here the math or point to the doc.
  */
 class CentroidalForceQPController
@@ -66,10 +66,11 @@ public:
 
     /**
      * @brief Get nb_eff, i.e. the number of end-effectors used.
-     * 
-     * @return int 
+     *
+     * @return int
      */
-    int get_nb_eff(){
+    int get_nb_eff()
+    {
         return nb_eff_;
     }
 

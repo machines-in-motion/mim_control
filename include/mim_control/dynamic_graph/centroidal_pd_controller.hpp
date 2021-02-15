@@ -10,11 +10,13 @@
 
 #pragma once
 
+// clang-format off
+#include "pinocchio/fwd.hpp"
+// clang-format on
 #include "dynamic-graph/all-signals.h"
 #include "dynamic-graph/entity.h"
 #include "mim_control/centroidal_pd_controller.hpp"
 #include "mim_control/dynamic_graph/signal_utils.hpp"
-#include "pinocchio/fwd.hpp"
 
 namespace mim_control
 {

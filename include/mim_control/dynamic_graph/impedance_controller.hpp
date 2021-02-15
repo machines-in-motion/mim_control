@@ -10,10 +10,12 @@
 
 #pragma once
 
-#include "mim_control/impedance_controller.hpp"
+// clang-format off
+#include "pinocchio/fwd.hpp"
+// clang-format on
 #include "dynamic-graph/all-signals.h"
 #include "dynamic-graph/entity.h"
-
+#include "mim_control/impedance_controller.hpp"
 
 namespace mim_control
 {
@@ -127,11 +129,11 @@ protected:
 
     /**
      * @brief Internally calls the ImpedanceController class.
-     * 
-     * @param signal_data 
-     * @param time 
-     * @return true 
-     * @return false 
+     *
+     * @param signal_data
+     * @param time
+     * @return true
+     * @return false
      */
     bool& one_iteration_callback(bool& signal_data, int time);
 
