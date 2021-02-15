@@ -8,15 +8,14 @@
  */
 
 #include "mim_control/dynamic_graph/centroidal_force_qp_controller.hpp"
-#include "mim_control/dynamic_graph/signal_utils.hpp"
 #include "dynamic-graph/all-commands.h"
 #include "dynamic-graph/factory.h"
+#include "mim_control/dynamic_graph/signal_utils.hpp"
 
 namespace mim_control
 {
 namespace dynamic_graph
 {
-
 DYNAMICGRAPH_FACTORY_ENTITY_PLUGIN(CentroidalForceQPController,
                                    "CentroidalForceQPController");
 

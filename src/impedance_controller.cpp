@@ -47,9 +47,10 @@ void ImpedanceController::initialize(const pinocchio::Model& pinocchio_model,
     // output
     torques_.resize(pinocchio_model_.nv, 1);
     torques_.fill(0.);
-    if(pinocchio_model_has_free_flyer_)
+    if (pinocchio_model_has_free_flyer_)
         joint_torques_.resize(pinocchio_model_.nv, 1);
-    else{
+    else
+    {
         joint_torques_.resize(pinocchio_model_.nv - 6, 1);
     }
 }
@@ -124,10 +125,11 @@ void ImpedanceController::run(
 
     // compute the output torques
     torques_ = (impedance_jacobian_.transpose() * impedance_force_);
-    
-    if(pinocchio_model_has_free_flyer_)
+
+    if (pinocchio_model_has_free_flyer_)
         joint_torques_ = torques_.tail(pinocchio_model_.nv - 6);
-    else{
+    else
+    {
         joint_torques_ = torques_;
     }
     return;

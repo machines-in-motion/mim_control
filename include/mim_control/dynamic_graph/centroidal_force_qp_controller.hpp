@@ -10,10 +10,12 @@
 
 #pragma once
 
-#include "mim_control/centroidal_force_qp_controller.hpp"
+// clang-format off
+#include "pinocchio/fwd.hpp"
+// clang-format on
 #include "dynamic-graph/all-signals.h"
 #include "dynamic-graph/entity.h"
-
+#include "mim_control/centroidal_force_qp_controller.hpp"
 
 namespace mim_control
 {
@@ -28,8 +30,8 @@ class CentroidalForceQPController : public dynamicgraph::Entity
 
 public:
     /**
-     * @brief Construct a new CentroidalForceQPController object using its Dynamic Graph
-     * name.
+     * @brief Construct a new CentroidalForceQPController object using its
+     * Dynamic Graph name.
      *
      * @param name
      */
@@ -56,7 +58,8 @@ public:
     dynamicgraph::SignalPtr<dynamicgraph::Vector, int> w_com_sin_;
 
     /** @brief Robot generalized velocity (dq). */
-    dynamicgraph::SignalPtr<dynamicgraph::Vector, int> relative_position_endeff_sin_;
+    dynamicgraph::SignalPtr<dynamicgraph::Vector, int>
+        relative_position_endeff_sin_;
 
     /** @brief Proportional gain from the cartesian PD. */
     dynamicgraph::SignalPtr<dynamicgraph::Vector, int> cnt_array_sin_;
