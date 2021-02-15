@@ -34,8 +34,8 @@ CentroidalPDController::CentroidalPDController(const std::string& name)
       define_input_signal(desired_com_position_sin_, "Vector3d"),
       define_input_signal(actual_com_velocity_sin_, "Vector3d"),
       define_input_signal(desired_com_velocity_sin_, "Vector3d"),
-      define_input_signal(actual_base_orientation_sin_, "Vector7d_quat"),
-      define_input_signal(desired_base_orientation_sin_, "Vector7d_quat"),
+      define_input_signal(actual_base_orientation_sin_, "Vector4d_quat"),
+      define_input_signal(desired_base_orientation_sin_, "Vector4d_quat"),
       define_input_signal(actual_base_angular_velocity_sin_, "Vector3d"),
       define_input_signal(desired_base_angular_velocity_sin_, "Vector3d"),
       // Output signals.
