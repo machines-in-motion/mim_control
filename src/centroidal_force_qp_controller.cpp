@@ -90,6 +90,13 @@ void CentroidalForceQPController::initialize(int number_endeffectors,
     }
 }
 
+void CentroidalForceQPController::set_slack_weights(
+    Eigen::Ref<const Vector6d> weights)
+{
+    // Slack variables weights.
+    hess_.block<6, 6>(3 * nb_eff_, 3 * nb_eff_) = weights.asDiagonal();
+}
+
 void CentroidalForceQPController::run(
     Eigen::Ref<const Vector6d> w_com,
     Eigen::Ref<const Eigen::VectorXd> relative_position_endeff,
