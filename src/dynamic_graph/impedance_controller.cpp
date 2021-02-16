@@ -94,7 +94,7 @@ dynamicgraph::Vector& ImpedanceController::impedance_force_callback(
     dynamicgraph::Vector& signal_data, int time)
 {
     one_iteration_sout_.access(time);
-    signal_data = impedance_controller_.get_torques();
+    signal_data = impedance_controller_.get_impedance_force();
     return signal_data;
 }
 
