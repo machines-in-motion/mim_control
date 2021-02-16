@@ -33,8 +33,7 @@ def demo(robot_name):
         dc = [50, 50, 50]
         kb = [100, 100, 200]
         db = [50.0, 50.0, 200.0]
-        qp_penalty_lin = 5e5
-        qp_penalty_ang = 1e6
+        qp_penalty_weights = [5e5, 5e5, 5e5, 1e6, 1e6, 1e6]
     elif robot_name == "bolt":
         robot = env.add_robot(BoltRobot)
         robot_config = BoltConfig()
@@ -43,8 +42,7 @@ def demo(robot_name):
         dc = [0, 0, 10]
         kb = [100, 100, 100]
         db = [10.0, 10.0, 10.0]
-        qp_penalty_lin = 1e6  # [1, 1, 1e6]
-        qp_penalty_ang = 1e6  # [1e6, 1e6, 1]
+        qp_penalty_weights = [1, 1, 1e6, 1e6, 1e6, 1]
     else:
         raise RuntimeError(
             "Robot name [" + str(robot_name) + "] unknown. "
@@ -56,7 +54,7 @@ def demo(robot_name):
 
     # Create impedance controllers
     root_name = "universe"
-    endeff_names = ["FL_ANKLE", "FR_ANKLE", "HL_ANKLE", "HR_ANKLE"]
+    endeff_names = robot_config.end_effector_names
     end_eff_ids = [
         pin_robot.model.getFrameId(ee_name) for ee_name in endeff_names
     ]
@@ -72,7 +70,8 @@ def demo(robot_name):
         2.5, np.diag(robot.pin_robot.mass(q_init)[3:6, 3:6])
     )
     force_qp = CentroidalForceQPController()
-    force_qp.initialize(robot.nb_ee, mu, qp_penalty_lin, qp_penalty_ang)
+    force_qp.initialize(robot.nb_ee, mu, 0, 0)
+    force_qp.set_slack_weights(qp_penalty_weights)
 
     # Reset the robot to some initial state.
     q0 = np.matrix(robot_config.initial_configuration).T

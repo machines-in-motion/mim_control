@@ -47,6 +47,13 @@ public:
                     double qp_penalty_ang);
 
     /**
+     * @brief Sets the weight for the slack variables in the QP problem.
+     *
+     * @param weights Weights to use on the slack variables.
+     */
+    void set_slack_weights(Eigen::Ref<const Vector6d> weights);
+
+    /**
      * @brief Computes the centroidal wrench using a PD controller.
      *
      * @param w_com The desired centroidal wrench to track.

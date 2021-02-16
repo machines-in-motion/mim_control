@@ -50,6 +50,13 @@ public:
                     double qp_penalty_lin,
                     double qp_penalty_ang);
 
+    /**
+     * @brief Sets the weight for the slack variables in the QP problem.
+     *
+     * @param weights Weights to use on the slack variables.
+     */
+    void set_slack_weights(dynamicgraph::Vector& weights);
+
     /*
      * Input Signals.
      */
