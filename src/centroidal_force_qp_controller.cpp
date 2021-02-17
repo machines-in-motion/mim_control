@@ -20,13 +20,10 @@ CentroidalForceQPController::CentroidalForceQPController()
 
 void CentroidalForceQPController::initialize(int number_endeffectors,
                                              double friction_coeff,
-                                             double qp_penalty_lin,
-                                             double qp_penalty_ang)
+                                             Eigen::Ref<const Vector6d> weights)
 {
     nb_eff_ = number_endeffectors;
     mu_ = friction_coeff;
-    qp_penalty_lin_ = qp_penalty_lin;
-    qp_penalty_ang_ = qp_penalty_ang;
 
     // Resize the problem.
     qp_.reset(3 * nb_eff_ + 6, 9, 5 * nb_eff_);
@@ -59,10 +56,7 @@ void CentroidalForceQPController::initialize(int number_endeffectors,
     hess_ *= 2.;
 
     // Slack variables weights.
-    hess_.block<3, 3>(3 * nb_eff_, 3 * nb_eff_).setIdentity();
-    hess_.block<3, 3>(3 * nb_eff_, 3 * nb_eff_) *= qp_penalty_lin;
-    hess_.block<3, 3>(3 * nb_eff_ + 3, 3 * nb_eff_ + 3).setIdentity();
-    hess_.block<3, 3>(3 * nb_eff_ + 3, 3 * nb_eff_ + 3) *= qp_penalty_ang;
+    hess_.block<6, 6>(3 * nb_eff_, 3 * nb_eff_) = weights.asDiagonal();
 
     // Setup centroidal wrench equality.
     for (int i = 0; i < nb_eff_; i++)
@@ -88,13 +82,6 @@ void CentroidalForceQPController::initialize(int number_endeffectors,
         ci_(5 * j + 3, 3 * j + 2) = mu_;
         ci_(5 * j + 4, 3 * j + 2) = 1;  // Fz >= 0
     }
-}
-
-void CentroidalForceQPController::set_slack_weights(
-    Eigen::Ref<const Vector6d> weights)
-{
-    // Slack variables weights.
-    hess_.block<6, 6>(3 * nb_eff_, 3 * nb_eff_) = weights.asDiagonal();
 }
 
 void CentroidalForceQPController::run(

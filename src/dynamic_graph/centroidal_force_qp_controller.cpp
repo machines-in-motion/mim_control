@@ -40,18 +40,12 @@ CentroidalForceQPController::CentroidalForceQPController(
 
 void CentroidalForceQPController::initialize(int number_endeffectors,
                                              double friction_coeff,
-                                             double qp_penalty_lin,
-                                             double qp_penalty_ang)
+                                             dynamicgraph::Vector& qp_penalty_weights)
 {
+    assert(qp_penalty_weights.size() == 6 && "Wrong size for qp_penalty_weights, expected dimension 6.");
+
     force_ctrl_.initialize(
-        number_endeffectors, friction_coeff, qp_penalty_lin, qp_penalty_ang);
-}
-
-void CentroidalForceQPController::set_slack_weights(dynamicgraph::Vector& weights)
-{
-    assert(weights.size() == 6 && "Wrong size for weights, expected dimension 6.");
-
-    force_ctrl_.set_slack_weights(weights);
+        number_endeffectors, friction_coeff, qp_penalty_weights);
 }
 
 dynamicgraph::Vector& CentroidalForceQPController::forces_callback(

@@ -42,20 +42,11 @@ public:
      *
      * @param number_endeffectors Maximum number of endeffectors in the problem.
      * @param friction_coeff Floor friction coefficient to use.
-     * @param qp_penalty_lin The penalty weight for the linear wcom violation.
-     * @param qp_penalty_ang The penalty weight for the angular wcom violation.
+     * @param qp_penalty_weights The penalty weight for the linear and angular wcom violation.
      */
     void initialize(int number_endeffectors,
                     double friction_coeff,
-                    double qp_penalty_lin,
-                    double qp_penalty_ang);
-
-    /**
-     * @brief Sets the weight for the slack variables in the QP problem.
-     *
-     * @param weights Weights to use on the slack variables.
-     */
-    void set_slack_weights(dynamicgraph::Vector& weights);
+                    dynamicgraph::Vector& qp_penalty_weights);
 
     /*
      * Input Signals.
