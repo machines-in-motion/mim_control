@@ -43,14 +43,6 @@ BOOST_PYTHON_MODULE(wbc)
 
     using mim_control::dynamic_graph::CentroidalForceQPController;
     dynamicgraph::python::exposeEntity<CentroidalForceQPController>()
-        .def(
-            "initialize",
-            &CentroidalForceQPController::initialize,
-            "Initialize the CentroidalForceQPController."
-        )
-        .def(
-            "set_slack_weights",
-            &CentroidalForceQPController::set_slack_weights,
-            "Set the weights for the slack variables."
-        );
+        .def("initialize", &CentroidalForceQPController::initialize,
+            "Initialize the CentroidalForceQPController.");
 }

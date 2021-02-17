@@ -24,7 +24,6 @@ void bind_centroidal_force_qp_controller(py::module& module)
 
         // Public methods.
         .def("initialize", &CentroidalForceQPController::initialize)
-        .def("set_slack_weights", &CentroidalForceQPController::set_slack_weights)
         .def("run", &CentroidalForceQPController::run)
         .def("get_forces",
              &CentroidalForceQPController::get_forces,

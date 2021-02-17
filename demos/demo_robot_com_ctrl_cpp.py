@@ -70,8 +70,7 @@ def demo(robot_name):
         2.5, np.diag(robot.pin_robot.mass(q_init)[3:6, 3:6])
     )
     force_qp = CentroidalForceQPController()
-    force_qp.initialize(robot.nb_ee, mu, 0, 0)
-    force_qp.set_slack_weights(qp_penalty_weights)
+    force_qp.initialize(robot.nb_ee, mu, qp_penalty_weights)
 
     # Reset the robot to some initial state.
     q0 = np.matrix(robot_config.initial_configuration).T

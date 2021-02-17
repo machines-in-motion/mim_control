@@ -38,20 +38,11 @@ public:
      *
      * @param number_endeffectors Maximum number of endeffectors in the problem.
      * @param friction_coeff Floor friction coefficient to use.
-     * @param qp_penalty_lin The penalty weight for the linear wcom violation.
-     * @param qp_penalty_ang The penalty weight for the angular wcom violation.
+     * @param qp_penalty_weights The penalty weight for the linear and angular wcom violation.
      */
     void initialize(int number_endeffectors,
                     double friction_coeff,
-                    double qp_penalty_lin,
-                    double qp_penalty_ang);
-
-    /**
-     * @brief Sets the weight for the slack variables in the QP problem.
-     *
-     * @param weights Weights to use on the slack variables.
-     */
-    void set_slack_weights(Eigen::Ref<const Vector6d> weights);
+                    Eigen::Ref<const Vector6d> qp_penalty_weights);
 
     /**
      * @brief Computes the centroidal wrench using a PD controller.
@@ -97,9 +88,6 @@ private:  // attributes
     int nb_eff_;
 
     double mu_;
-
-    double qp_penalty_lin_;
-    double qp_penalty_ang_;
 
     eiquadprog::solvers::EiquadprogFast qp_;
 };
