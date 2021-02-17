@@ -10,12 +10,10 @@ Date:   Feb 16, 2021
 import numpy as np
 np.set_printoptions(suppress=True, precision=3)
 
-from dg_tools.utils import *
-
 from robot_properties_solo.config import Solo12Config
 from dg_blmc_robots.solo.solo12_bullet import get_solo12_robot
 
-from mim_control.dg.wbc import WholeBodyController
+from mim_control.dynamic_graph.wbc_graph import WholeBodyController
 
 if __name__ == "__main__":
     pin_robot = Solo12Config.buildRobotWrapper()

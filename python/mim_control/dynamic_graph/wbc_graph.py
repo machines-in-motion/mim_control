@@ -7,7 +7,12 @@ Author: Julian Viereck
 Date:   Feb 16, 2021
 """
 
-from dg_tools.utils import *
+import numpy as np
+
+from dg_tools.utils import (
+    constVectorOp, subtract_vec_vec, hom2pos, add_vec_vec, stack_two_vectors,
+    selec_vector, zero_vec, basePoseQuat2PoseRPY
+)
 import dynamic_graph as dg
 import dynamic_graph.sot.dynamic_pinocchio as dp
 
