@@ -13,6 +13,8 @@
 #include "mim_control/dynamic_graph/centroidal_pd_controller.hpp"
 #include "mim_control/dynamic_graph/impedance_controller.hpp"
 
+#include <eigenpy/eigenpy.hpp>
+
 namespace dg = dynamicgraph;
 
 typedef bp::return_value_policy<bp::reference_existing_object>
@@ -20,6 +22,8 @@ typedef bp::return_value_policy<bp::reference_existing_object>
 
 BOOST_PYTHON_MODULE(wbc)
 {
+    eigenpy::enableEigenPy();
+
     bp::import("dynamic_graph");
 
     using mim_control::dynamic_graph::ImpedanceController;

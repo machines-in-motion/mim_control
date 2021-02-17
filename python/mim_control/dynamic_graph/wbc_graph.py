@@ -19,7 +19,7 @@ import dynamic_graph.sot.dynamic_pinocchio as dp
 import mim_control.dynamic_graph.wbc as mim_control_dg
 
 class WholeBodyController:
-    def __init__(self, prefix, pin_robot, endeff_names, friction_coeff, qp_penalty_lin, qp_penalty_ang):
+    def __init__(self, prefix, pin_robot, endeff_names, friction_coeff, qp_penalty_weights):
         self.pin_robot = pin_robot
         self.nv = pin_robot.model.nv
         self.ne = len(endeff_names)
@@ -44,7 +44,7 @@ class WholeBodyController:
         ###
         # CentroidalForceQPController
         self.f_ctrl = mim_control_dg.CentroidalForceQPController(prefix + '_f_controller')
-        self.f_ctrl.initialize(len(endeff_names), friction_coeff, qp_penalty_lin, qp_penalty_ang)
+        self.f_ctrl.initialize(len(endeff_names), friction_coeff, qp_penalty_weights)
 
         self.endeff_names = endeff_names
         for endeff_name in self.endeff_names:

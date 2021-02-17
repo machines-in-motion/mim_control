@@ -18,9 +18,11 @@ from mim_control.dynamic_graph.wbc_graph import WholeBodyController
 if __name__ == "__main__":
     pin_robot = Solo12Config.buildRobotWrapper()
 
+    qp_penalty_weights = np.array([5e5, 5e5, 5e5, 1e6, 1e6, 1e6])
+
     ###
     # Create the whole body controller.
-    wbc = WholeBodyController('test_wbc', pin_robot, Solo12Config.end_effector_names, 0.2, 5e5, 1e6)
+    wbc = WholeBodyController('test_wbc', pin_robot, Solo12Config.end_effector_names, 0.2, qp_penalty_weights)
 
     ###
     # Specify gains for the controller.
