@@ -40,7 +40,7 @@ CentroidalForceQPController::CentroidalForceQPController(
 
 void CentroidalForceQPController::initialize(int number_endeffectors,
                                              double friction_coeff,
-                                             dynamicgraph::Vector& qp_penalty_weights)
+                                             Eigen::Ref<const Vector6d> qp_penalty_weights)
 {
     assert(qp_penalty_weights.size() == 6 && "Wrong size for qp_penalty_weights, expected dimension 6.");
 

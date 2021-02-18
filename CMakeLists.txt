@@ -38,7 +38,6 @@ search_for_boost_python()
 # Optionnal
 find_package(dynamic-graph QUIET)
 find_package(dynamic-graph-python QUIET)
-find_package(eigenpy QUIET)
 
 set(build_dynamic_graph_plugins FALSE)
 if(${dynamic-graph_FOUND} AND ${dynamic-graph-python_FOUND})
@@ -85,7 +84,6 @@ if(${build_dynamic_graph_plugins})
   target_link_libraries(${plugin_name} dynamic-graph::dynamic-graph)
   target_link_libraries(${plugin_name}
                         dynamic-graph-python::dynamic-graph-python)
-  target_link_libraries(${plugin_name} eigenpy::eigenpy)
   # Install the target and it's python bindings.
   install_dynamic_graph_plugin_python_bindings(${plugin_name})
   # Install the plugin.
