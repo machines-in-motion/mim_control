@@ -46,7 +46,7 @@ public:
      */
     void initialize(int number_endeffectors,
                     double friction_coeff,
-                    dynamicgraph::Vector& qp_penalty_weights);
+                    Eigen::Ref<const Vector6d> qp_penalty_weights);
 
     /*
      * Input Signals.
