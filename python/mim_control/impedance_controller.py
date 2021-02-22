@@ -1,7 +1,7 @@
 ##################################################################################################################
 ## This is the implementation for impedance controller between any two frames of the robot.
 ## This code works with just pybullet and does not depend on dynamic graph.
-## Primarly designed for designing and debuggin controllers
+## Primarily designed for designing and debuggin controllers
 #################################################################################################################
 ## Author: Avadesh Meduri
 ## Date: 20/09/2019
@@ -120,7 +120,7 @@ class ImpedanceController(object):
         Computes the desired joint torques tau = -Jt * (F + kp(x-x_des) + kd(xd-xd_des))
         Inputs:
             q = joint angles
-            dq = joint velocites
+            dq = joint velocities
             Kp = proportional gain
             Kd = derivative gain
             x_des = desired [x,y,z] at time t (in the root joint frame)
@@ -228,7 +228,7 @@ class ImpedanceControllerSolo8(ImpedanceController):
         Computes the desired joint torques tau = -Jt * (F + kp(x-x_des) + kd(xd-xd_des))
         Inputs:
             q = joint angles
-            dq = joint velocites
+            dq = joint velocities
             Kp = proportional gain
             Kd = derivative gain
             x_des = desired [x,y,z] at time t (in the root joint frame)
@@ -263,10 +263,10 @@ class ImpedanceControllerSolo8(ImpedanceController):
         return tau
 
     def compute_impedance_torques_world(self, q, dq, kp, kd, x_des, xd_des, f):
-        """Computes the leg impedance using world coordiante x_des and xd_des.
+        """Computes the leg impedance using world coordinate x_des and xd_des.
 
         Args:
-            q: pinocchio generalized coordiantes of robot
+            q: pinocchio generalized coordinates of robot
             dq: pinocchio generalized velocity of robot
             kp: (list size 3) P gains for position error.
             kd: (list size 3) D gains for velocity error.
