@@ -26,7 +26,7 @@ class ImpedanceController(object):
 
         """
         Input :
-            name : Name of the impdeance controller (Ex. Front left leg impedance)
+            name : Name of the impedance controller (Ex. Front left leg impedance)
             pinocchio_robot : pinocchio wrapper instance.
             frame_root_name : The root frame name where the spring starts(Ex. Hip)
             frame_end_name : the second frame name where the spring ends(Ex. end effector)
@@ -169,10 +169,10 @@ class ImpedanceController(object):
         return final_tau
 
     def compute_impedance_torques_world(self, q, dq, kp, kd, x_des, xd_des, f):
-        """Computes the leg impedance using world coordiante x_des and xd_des.
+        """Computes the leg impedance using world coordinate x_des and xd_des.
 
         Args:
-            q: pinocchio generalized coordiantes of robot
+            q: pinocchio generalized coordinates of robot
             dq: pinocchio generalized velocity of robot
             kp: (list size 3) P gains for position error.
             kd: (list size 3) D gains for velocity error.
