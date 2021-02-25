@@ -38,7 +38,8 @@ public:
      *
      * @param number_endeffectors Maximum number of endeffectors in the problem.
      * @param friction_coeff Floor friction coefficient to use.
-     * @param qp_penalty_weights The penalty weight for the linear and angular wcom violation.
+     * @param qp_penalty_weights The penalty weight for the linear and angular
+     * wcom violation.
      */
     void initialize(int number_endeffectors,
                     double friction_coeff,

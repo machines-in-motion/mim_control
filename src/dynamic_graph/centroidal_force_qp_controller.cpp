@@ -38,11 +38,13 @@ CentroidalForceQPController::CentroidalForceQPController(
                                   << cnt_array_sin_ << forces_sout_);
 }
 
-void CentroidalForceQPController::initialize(int number_endeffectors,
-                                             double friction_coeff,
-                                             Eigen::Ref<const Vector6d> qp_penalty_weights)
+void CentroidalForceQPController::initialize(
+    int number_endeffectors,
+    double friction_coeff,
+    Eigen::Ref<const Vector6d> qp_penalty_weights)
 {
-    assert(qp_penalty_weights.size() == 6 && "Wrong size for qp_penalty_weights, expected dimension 6.");
+    assert(qp_penalty_weights.size() == 6 &&
+           "Wrong size for qp_penalty_weights, expected dimension 6.");
 
     force_ctrl_.initialize(
         number_endeffectors, friction_coeff, qp_penalty_weights);

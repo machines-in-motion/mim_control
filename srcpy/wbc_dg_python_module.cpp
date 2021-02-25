@@ -42,7 +42,8 @@ BOOST_PYTHON_MODULE(wbc)
     dynamicgraph::python::exposeEntity<CentroidalPDController>();
 
     using mim_control::dynamic_graph::CentroidalForceQPController;
-    dynamicgraph::python::exposeEntity<CentroidalForceQPController>()
-        .def("initialize", &CentroidalForceQPController::initialize,
-            "Initialize the CentroidalForceQPController.");
+    dynamicgraph::python::exposeEntity<CentroidalForceQPController>().def(
+        "initialize",
+        &CentroidalForceQPController::initialize,
+        "Initialize the CentroidalForceQPController.");
 }
