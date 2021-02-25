@@ -1,4 +1,4 @@
-"""This file is a demo for using the DG whole body controller.
+"""End-effector impedance and centroidal dynamics  based whole body controller.
 
 License BSD-3-Clause
 Copyright (c) 2021, New York University and Max Planck Gesellschaft.
