@@ -34,8 +34,8 @@ class GoTo(object):
         """
         Set the PD controller gains
         """
-        self.pd_ctrl.Kp.value = np.array(self._nb_dof * [Kp])
-        self.pd_ctrl.Kd.value = np.array(self._nb_dof * [Kd])
+        self._pd_ctrl.Kp.value = np.array(self._nb_dof * [Kp])
+        self._pd_ctrl.Kd.value = np.array(self._nb_dof * [Kd])
 
     def go_to(self, desired_joint_position_rad, nb_iteration):
         """ Set the curve goal. set(vector (goal), int (duration)) """
@@ -46,25 +46,25 @@ class GoTo(object):
             )
             return
         else:
-            return self.smooth_reach.set(
+            return self._smooth_reach.set(
                 desired_joint_position_rad, nb_iteration
             )
 
     def record_data(self, robot):
         # Adding logging traces.
-        robot.add_trace(self.pd_ctrl.name, "desired_position")
-        robot.add_trace(self.pd_ctrl.name, "desired_velocity")
-        robot.add_trace(self.pd_ctrl.name, "position")
-        robot.add_trace(self.pd_ctrl.name, "velocity")
-        robot.add_trace(self.pd_ctrl.name, "control")
-        robot.add_trace(self.smooth_reach.name, "start")
-        robot.add_trace(self.smooth_reach.name, "goal")
+        robot.add_trace(self._pd_ctrl.name, "desired_position")
+        robot.add_trace(self._pd_ctrl.name, "desired_velocity")
+        robot.add_trace(self._pd_ctrl.name, "position")
+        robot.add_trace(self._pd_ctrl.name, "velocity")
+        robot.add_trace(self._pd_ctrl.name, "control")
+        robot.add_trace(self._smooth_reach.name, "start")
+        robot.add_trace(self._smooth_reach.name, "goal")
 
     def plug(self, joint_positions_sout, joint_velocities_sout, torques_sin):
         # plug the inputs.
-        dg.plug(joint_positions_sout, self.pd_ctrl.position)
-        dg.plug(joint_velocities_sout, self.pd_ctrl.velocity)
-        dg.plug(joint_positions_sout, self.smooth_reach.start)
+        dg.plug(joint_positions_sout, self._pd_ctrl.position)
+        dg.plug(joint_velocities_sout, self._pd_ctrl.velocity)
+        dg.plug(joint_positions_sout, self._smooth_reach.start)
 
         # plug the outins
-        dg.plug(self.pd_ctrl.control, torques_sin)
+        dg.plug(self._pd_ctrl.control, torques_sin)
