@@ -36,19 +36,6 @@ void CentroidalPDController::run(Eigen::Ref<const Eigen::Vector3d> kc,
                                  Eigen::Ref<const Eigen::Vector3d> angvel,
                                  Eigen::Ref<const Eigen::Vector3d> angvel_des)
 {
-    /*************************************************************************/
-    // Compute the linear part of the wrench.
-
-    /*---------- computing position error ----*/
-    pos_error_.array() = com_des.array() - com.array();
-    vel_error_.array() = vcom_des.array() - vcom.array();
-    /*---------- computing tourques ----*/
-
-    wrench_.head<3>().array() = mass_ * (pos_error_.array() * kc.array() +
-                                         vel_error_.array() * dc.array());
-
-    /*************************************************************************/
-    // Compute the angular part of the wrench.
     des_ori_quat_.w() = ori_des[3];
     des_ori_quat_.vec()[0] = ori_des[0];
     des_ori_quat_.vec()[1] = ori_des[1];
@@ -62,6 +49,19 @@ void CentroidalPDController::run(Eigen::Ref<const Eigen::Vector3d> kc,
     des_ori_se3_ = des_ori_quat_.toRotationMatrix();
     ori_se3_ = ori_quat_.toRotationMatrix();
 
+    /*************************************************************************/
+    // Compute the linear part of the wrench.
+
+    /*---------- computing position error ----*/
+    pos_error_.array() = com_des.array() - com.array();
+    vel_error_.array() = vcom_des.array() - vcom.array();
+    /*---------- computing tourques ----*/
+
+    wrench_.head<3>().array() = mass_ * (pos_error_.array() * kc.array() +
+                                         vel_error_.array() * dc.array());
+
+    /*************************************************************************/
+    // Compute the angular part of the wrench.
     ori_error_se3_ = des_ori_se3_.transpose() * ori_se3_;
     ori_error_quat_ = ori_error_se3_;
 
@@ -82,8 +82,14 @@ void CentroidalPDController::run(Eigen::Ref<const Eigen::Vector3d> kc,
 
     /*---------- computing ang error ----*/
 
+    // Rotate the des and current angular velocity into the world frame.
+    angvel_world_error_ = ori_se3_ * angvel;
+    des_angvel_world_error_ = des_ori_se3_ * angvel_des;
+
     wrench_.tail<3>().array() =
-        db.array() * inertia_.array() * (angvel_des.array() - angvel.array()) +
+        db.array() * inertia_.array() * (
+            des_angvel_world_error_.array() - angvel_world_error_.array()
+        ) +
         ori_error_.array();
 }
 

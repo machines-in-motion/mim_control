@@ -114,6 +114,8 @@ def demo(robot_name):
         # Read the final state and forces after the stepping.
         q, dq = robot.get_state()
 
+	quat = pin.Quaternion(q[6], q[3], q[4], q[5])
+
         # computing forces to be applied in the centroidal space
         centrl_pd_ctrl.run(
             kc,
@@ -122,7 +124,7 @@ def demo(robot_name):
             db,
             q[:3],
             x_com,
-            dq[:3],
+            quat.toRotationMatrix().dot(dq[:3]), # local to world frame
             xd_com,
             q[3:7],
             x_ori,

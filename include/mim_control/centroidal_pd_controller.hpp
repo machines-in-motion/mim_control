@@ -70,6 +70,9 @@ private:  // attributes
     Eigen::Vector3d vel_error_;
     Eigen::Vector3d ori_error_;
 
+    Eigen::Vector3d angvel_world_error_;
+    Eigen::Vector3d des_angvel_world_error_;
+
     Eigen::Quaternion<double> ori_quat_;
     Eigen::Quaternion<double> des_ori_quat_;
     Eigen::Quaternion<double> ori_error_quat_;
@@ -78,6 +81,8 @@ private:  // attributes
     Eigen::Matrix<double, 3, 3> des_ori_se3_;
     Eigen::Matrix<double, 3, 3>
         ori_error_se3_;  // refer to christian ott paper for definitions (Rdb)
+
+
 };
 
 }  // namespace mim_control

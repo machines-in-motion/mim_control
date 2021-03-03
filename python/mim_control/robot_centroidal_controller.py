@@ -51,7 +51,6 @@ class RobotCentroidalController:
         self.eff_ids = self.robot_config.end_eff_ids
         self.qp_penalty_lin = qp_penalty_lin
         self.qp_penalty_ang = qp_penalty_ang
-        self.rotate_vel_error = False
 
     def compute_com_wrench(self, q, dq, des_pos, des_vel, des_ori, des_angvel):
         """Compute the desired COM wrench (equation 1).
@@ -75,15 +74,17 @@ class RobotCentroidalController:
 
         cur_angvel = arr(dq[3:6])
 
-        if self.rotate_vel_error:
-            # Rotate the des and current angular velocity into the world frame.
-            quat_des = pin.Quaternion(
-                des_ori[3], des_ori[0], des_ori[1], des_ori[2]
-            ).matrix()
-            des_angvel = quat_des.dot(des_angvel)
+        # Rotate the des and current angular velocity into the world frame.
+        quat_des = pin.Quaternion(
+            des_ori[3], des_ori[0], des_ori[1], des_ori[2]
+        ).matrix()
+        des_angvel = quat_des.dot(des_angvel)
 
-            quat_cur = pin.Quaternion(q[6], q[3], q[4], q[5]).matrix()
-            cur_angvel = quat_cur.dot(cur_angvel)
+        quat_cur = pin.Quaternion(q[6], q[3], q[4], q[5]).matrix()
+        cur_angvel = quat_cur.dot(cur_angvel)
+
+        # Rotate the base velocity into global frame as well.
+        vcom = quat_cur.dot(vcom)
 
         w_com = np.hstack(
             [

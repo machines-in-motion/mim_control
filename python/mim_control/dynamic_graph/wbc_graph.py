@@ -18,6 +18,7 @@ from dg_tools.utils import (
     selec_vector,
     zero_vec,
     basePoseQuat2PoseRPY,
+    multiply_mat_vec
 )
 import dynamic_graph as dg
 import dynamic_graph.sot.dynamic_pinocchio as dp
@@ -56,6 +57,11 @@ class WholeBodyController:
         self.wcom_pd_ctrl.initialize(
             np.sum([i.mass for i in pin_robot.model.inertias]),
             np.diag(pin_robot.mass(q_init)[3:6, 3:6]),
+        )
+
+        dg.plug(
+            self.dg_robot.signal('com'),
+            self.wcom_pd_ctrl.actual_com_position_sin
         )
 
         ###
@@ -146,7 +152,7 @@ class WholeBodyController:
         self.cnt_array_sin = self.f_ctrl.cnt_array_sin
 
     def plug(self, robot, base_position, base_velocity):
-        # Args
+        # Args:
         #   robot; DGM robot device
         #   base_position: The base position as a 7 dim vector signal
         #   base_velocity: The base velocity as a 6 dim vector signal
@@ -180,18 +186,17 @@ class WholeBodyController:
             dg.plug(velocity, imp.robot_velocity_sin)
 
         # Setting the actual quantities for the centroidal-pd controller.
-        # NOTE: Using the base as approximation for the com.
         dg.plug(
-            selec_vector(base_position, 0, 3),
-            self.wcom_pd_ctrl.actual_com_position_sin,
+            multiply_mat_vec(
+                self.dg_robot.signal('Jcom'),
+                velocity
+            ),
+            self.wcom_pd_ctrl.actual_com_velocity_sin
         )
+
         dg.plug(
             selec_vector(base_position, 3, 7),
             self.wcom_pd_ctrl.actual_base_orientation_sin,
-        )
-        dg.plug(
-            selec_vector(base_velocity, 0, 3),
-            self.wcom_pd_ctrl.actual_com_velocity_sin,
         )
         dg.plug(
             selec_vector(base_velocity, 3, 6),
