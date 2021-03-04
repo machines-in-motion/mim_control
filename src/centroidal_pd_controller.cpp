@@ -9,6 +9,7 @@
  */
 
 #include "mim_control/centroidal_pd_controller.hpp"
+#include "pinocchio/spatial/explog.hpp"
 
 namespace mim_control
 {
@@ -65,20 +66,7 @@ void CentroidalPDController::run(Eigen::Ref<const Eigen::Vector3d> kc,
     ori_error_se3_ = des_ori_se3_.transpose() * ori_se3_;
     ori_error_quat_ = ori_error_se3_;
 
-    // todo: multiply as matrix
-
-    ori_error_[0] =
-        -2.0 * ((ori_error_quat_.w() * ori_error_quat_.vec()[0] * kb[0]) +
-                (kb[2] - kb[1]) *
-                    (ori_error_quat_.vec()[1] * ori_error_quat_.vec()[2]));
-    ori_error_[1] =
-        -2.0 * ((ori_error_quat_.w() * ori_error_quat_.vec()[1] * kb[1]) +
-                (kb[0] - kb[2]) *
-                    (ori_error_quat_.vec()[0] * ori_error_quat_.vec()[2]));
-    ori_error_[2] =
-        -2.0 * ((ori_error_quat_.w() * ori_error_quat_.vec()[2] * kb[2]) +
-                (kb[1] - kb[0]) *
-                    (ori_error_quat_.vec()[1] * ori_error_quat_.vec()[0]));
+    ori_error_ = pinocchio::quaternion::log3(des_ori_quat_ * ori_quat_.conjugate());
 
     /*---------- computing ang error ----*/
 
@@ -90,7 +78,7 @@ void CentroidalPDController::run(Eigen::Ref<const Eigen::Vector3d> kc,
         db.array() * inertia_.array() * (
             des_angvel_world_error_.array() - angvel_world_error_.array()
         ) +
-        ori_error_.array();
+        kb.array() * ori_error_.array();
 }
 
 Vector6d& CentroidalPDController::get_wrench()
