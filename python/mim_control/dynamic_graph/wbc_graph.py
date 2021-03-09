@@ -23,6 +23,8 @@ from dg_tools.utils import (
 import dynamic_graph as dg
 import dynamic_graph.sot.dynamic_pinocchio as dp
 
+from dynamic_graph.sot.core.math_small_entities import Add_of_vector
+
 import mim_control.dynamic_graph.wbc as mim_control_dg
 
 
@@ -35,6 +37,7 @@ class WholeBodyController:
         friction_coeff,
         qp_penalty_weights,
     ):
+        self.prefix = prefix
         self.pin_robot = pin_robot
         self.nv = pin_robot.model.nv
         self.ne = len(endeff_names)
@@ -82,7 +85,10 @@ class WholeBodyController:
         self.com_signal = self.dg_robot.signal("com")
 
         self.rel_eff_pos = subtract_vec_vec(
-            hom2pos(self.dg_robot.signal("pos_" + self.endeff_names[0])),
+            hom2pos(
+                self.dg_robot.signal("pos_" + self.endeff_names[0]),
+                self.prefix + '_pos_' + self.endeff_names[0]
+            ),
             self.com_signal,
         )
 
@@ -91,7 +97,8 @@ class WholeBodyController:
                 self.rel_eff_pos,
                 subtract_vec_vec(
                     hom2pos(
-                        self.dg_robot.signal("pos_" + self.endeff_names[i])
+                        self.dg_robot.signal("pos_" + self.endeff_names[i]),
+                        self.prefix + '_pos_' + self.endeff_names[i]
                     ),
                     self.com_signal,
                 ),
@@ -108,6 +115,7 @@ class WholeBodyController:
         ###
         # Impedance controllers.
         self.imps = []
+        self.imps_feedforward = []
 
         # Create plugable vector signals to control the impedance controller.
         for i, endeff_name in enumerate(self.endeff_names):
@@ -116,6 +124,11 @@ class WholeBodyController:
             )
             imp.initialize(pin_robot.model, "universe", endeff_name)
 
+            # Create a way to specify a feedforward force.
+            op = Add_of_vector(prefix + "_imp_offset_" + endeff_name)
+            op.sin(0).value = np.zeros(6)
+            self.imps_feedforward.append(op.sin(0))
+
             dg.plug(
                 stack_two_vectors(
                     selec_vector(self.f_ctrl.forces_sout, 3 * i, 3 * (i + 1)),
@@ -123,7 +136,12 @@ class WholeBodyController:
                     3,
                     3,
                 ),
-                imp.feed_forward_force_sin,
+                op.sin(1)
+            )
+
+            dg.plug(
+                op.sout,
+                imp.feed_forward_force_sin
             )
 
             self.imps.append(imp)
@@ -151,11 +169,28 @@ class WholeBodyController:
 
         self.cnt_array_sin = self.f_ctrl.cnt_array_sin
 
+    def trace(self, robot=None):
+        if robot is None:
+            robot = self.robot
+
+        robot.add_trace(self.prefix + '_q', 'sout')
+        robot.add_trace(self.prefix + '_dq', 'sout')
+
+        for eff_name, imp in zip(self.endeff_names, self.imps):
+            # Actual position of the endeffector.
+            robot.add_trace(self.prefix + '_pos_' + eff_name, 'sout')
+
+            # Desired position of the endeffector.
+            robot.add_trace(imp.name, 'desired_end_frame_placement_sin')
+
+
     def plug(self, robot, base_position, base_velocity):
         # Args:
         #   robot; DGM robot device
         #   base_position: The base position as a 7 dim vector signal
         #   base_velocity: The base velocity as a 6 dim vector signal
+
+        self.robot = robot
 
         # Create the input to the dg_robot.
         base_pose_rpy = basePoseQuat2PoseRPY(base_position)
@@ -165,7 +200,8 @@ class WholeBodyController:
             base_pose_rpy, robot.device.joint_positions, 6, self.nv - 6
         )
         velocity = stack_two_vectors(
-            base_velocity, robot.device.joint_velocities, 6, self.nv - 6
+            base_velocity, robot.device.joint_velocities, 6, self.nv - 6,
+            self.prefix + '_dq'
         )
 
         dg.plug(position, self.dg_robot.signal("position"))
@@ -179,7 +215,8 @@ class WholeBodyController:
 
         # Create the input to the impedance controllers.
         position = stack_two_vectors(
-            base_position, robot.device.joint_positions, 7, self.nv - 6
+            base_position, robot.device.joint_positions, 7, self.nv - 6,
+            self.prefix + '_q'
         )
         for imp in self.imps:
             dg.plug(position, imp.robot_configuration_sin)
