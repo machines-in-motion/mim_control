@@ -50,6 +50,9 @@ class GoTo(object):
                 desired_joint_position_rad, nb_iteration
             )
 
+    def freeze(self):
+        self.go_to(self._pd_ctrl.position.value, 1)
+
     def record_data(self, robot):
         # Adding logging traces.
         robot.add_trace(self._pd_ctrl.name, "desired_position")
