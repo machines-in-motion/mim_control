@@ -70,6 +70,9 @@ private:  // attributes
     Eigen::Vector3d vel_error_;
     Eigen::Vector3d ori_error_;
 
+    Eigen::Vector3d angvel_world_error_;
+    Eigen::Vector3d des_angvel_world_error_;
+
     Eigen::Quaternion<double> ori_quat_;
     Eigen::Quaternion<double> des_ori_quat_;
     Eigen::Quaternion<double> ori_error_quat_;
