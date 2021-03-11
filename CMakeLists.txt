@@ -48,10 +48,13 @@ endif()
 # Create the main library
 #
 
+# cmake-format: off
 add_library(
   ${PROJECT_NAME} SHARED
-  src/impedance_controller6d.cpp src/impedance_controller3d.cpp
-  src/centroidal_pd_controller.cpp src/centroidal_force_qp_controller.cpp)
+  src/impedance_controller.cpp
+  src/centroidal_pd_controller.cpp
+  src/centroidal_force_qp_controller.cpp)
+# cmake-format: on
 target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
 target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME} eiquadprog::eiquadprog)
@@ -122,8 +125,7 @@ pybind11_add_module(
   ${PROJECT_NAME}_cpp
   MODULE
   srcpy/${PROJECT_NAME}.cpp
-  srcpy/impedance_controller3d.cpp
-  srcpy/impedance_controller6d.cpp
+  srcpy/impedance_controller.cpp
   srcpy/centroidal_pd_controller.cpp
   srcpy/centroidal_force_qp_controller.cpp)
 

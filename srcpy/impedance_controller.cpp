@@ -7,7 +7,7 @@
  * @brief Python bindings for the StepperHead class
  */
 
-#include "mim_control/impedance_controller6d.hpp"
+#include "mim_control/impedance_controller.hpp"
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -17,7 +17,7 @@ namespace py = pybind11;
 
 namespace mim_control
 {
-void bind_impedance_controller6d(py::module& module)
+void bind_impedance_controller(py::module& module)
 {
     py::class_<ImpedanceController>(module, "ImpedanceController")
         .def(py::init<>())
