@@ -242,3 +242,17 @@ class WholeBodyController:
 
         # Finally, plug the computed torques to the output.
         dg.plug(self.joint_torques_sout, robot.device.ctrl_joint_torques)
+
+    def plug_base_as_com(self, base_position, base_velocity_world):
+        """ Instead of the COM use the base as com. """
+        dg.plug(
+            selec_vector(base_position, 0, 3),
+            self.wcom_pd_ctrl.actual_com_position_sin
+        )
+
+        dg.plug(
+            selec_vector(base_velocity_world, 0, 3),
+            self.wcom_pd_ctrl.actual_com_velocity_sin
+        )
+
+
