@@ -81,8 +81,6 @@ private:  // attributes
     Eigen::Matrix<double, 3, 3> des_ori_se3_;
     Eigen::Matrix<double, 3, 3>
         ori_error_se3_;  // refer to christian ott paper for definitions (Rdb)
-
-
 };
 
 }  // namespace mim_control
