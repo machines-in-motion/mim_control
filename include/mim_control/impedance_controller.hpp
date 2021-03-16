@@ -131,6 +131,9 @@ private:  // attributes
     /** @brief Measured root frame placement. */
     pinocchio::SE3 root_placement_;
 
+    /** @brief Measured root frame orientation. */
+    pinocchio::SE3 root_orientation_;
+
     /** @brief Measured root frame velocity. */
     pinocchio::Motion root_velocity_;
 
@@ -146,11 +149,26 @@ private:  // attributes
     /** @brief Measured end frame placement. */
     pinocchio::SE3 end_placement_;
 
+    /** @brief Measured end frame orientation. */
+    pinocchio::SE3 end_orientation_;
+
     /** @brief Measured end frame velocity. */
     pinocchio::Motion end_velocity_;
 
     /** @brief Impedance force. Accessible for machine learning purposes. */
     Vector6d impedance_force_;
+
+    /** @brief Measured end frame placement in root frame. */
+    pinocchio::SE3 actual_end_frame_placement_;
+
+    /** @brief Measured end frame placement in root frame. */
+    pinocchio::Motion actual_end_frame_velocity_;
+
+    /** @brief SE3 placement error. */
+    Eigen::Matrix<double, 6, 1> err_se3_;
+
+    /** @brief SE3 velocity error. */
+    pinocchio::Motion err_vel_;
 
     /** @brief Jacobian used in the computation of the impedance. */
     pinocchio::Data::Matrix6x impedance_jacobian_;

@@ -8,6 +8,7 @@
  */
 
 #include "mim_control/impedance_controller.hpp"
+
 #include "pinocchio/algorithm/frames.hpp"
 
 namespace mim_control
@@ -53,6 +54,10 @@ void ImpedanceController::initialize(const pinocchio::Model& pinocchio_model,
     {
         joint_torques_.resize(pinocchio_model_.nv - 6, 1);
     }
+
+    // Intermediate variables.
+    root_orientation_ = pinocchio::SE3::Identity();
+    end_orientation_ = pinocchio::SE3::Identity();
 }
 
 void ImpedanceController::run(
@@ -80,31 +85,39 @@ void ImpedanceController::run(
 
     root_placement_ = pinocchio_data_.oMf[root_frame_index_];
     end_placement_ = pinocchio_data_.oMf[end_frame_index_];
-    root_velocity_ =
-        pinocchio::getFrameVelocity(pinocchio_model_,
-                                    pinocchio_data_,
-                                    root_frame_index_,
-                                    pinocchio::LOCAL_WORLD_ALIGNED);
-    end_velocity_ = pinocchio::getFrameVelocity(pinocchio_model_,
-                                                pinocchio_data_,
-                                                end_frame_index_,
-                                                pinocchio::LOCAL_WORLD_ALIGNED);
+    root_velocity_ = pinocchio::getFrameVelocity(
+        pinocchio_model_, pinocchio_data_, root_frame_index_, pinocchio::WORLD);
+    end_velocity_ = pinocchio::getFrameVelocity(
+        pinocchio_model_, pinocchio_data_, end_frame_index_, pinocchio::WORLD);
+
+    // Orientations
+    root_orientation_.rotation() = root_placement_.rotation();
+    end_orientation_.rotation() = end_placement_.rotation();
+
+    // Actual end frame placement in root frame.
+    actual_end_frame_placement_ = root_placement_.actInv(end_placement_);
+
+    // Placement error.
+    err_se3_.head<3>() = root_orientation_.rotation() *
+                         (desired_end_frame_placement.translation() -
+                          actual_end_frame_placement_.translation());
+    err_se3_.tail<3>() =
+        pinocchio::log3(desired_end_frame_placement.rotation().transpose() *
+                        actual_end_frame_placement_.rotation());
+
+    // Actual end frame velocity in root frame.
+    actual_end_frame_velocity_ =
+        end_placement_.actInv(end_velocity_ - root_velocity_);
+
+    // Velocity error.
+    err_vel_ = end_orientation_.act(desired_end_frame_velocity -
+                                    actual_end_frame_velocity_);
 
     // Compute the force to be applied to the environment.
-    const pinocchio::SE3 diff = desired_end_frame_placement.actInv(
-        root_placement_.actInv(end_placement_));
-    impedance_force_.head(3) =
-        - gain_proportional.head(3) * diff.translation().array();
-    impedance_force_.tail(3) =
-        - gain_proportional.tail(3) * pinocchio::log3(diff.rotation()).array();
-
-    impedance_force_ -= (gain_derivative * (desired_end_frame_velocity -
-                                            (end_velocity_ - root_velocity_))
-                                               .toVector()
-                                               .array())
-                            .matrix();
-
+    impedance_force_ = gain_proportional * err_se3_.array();
     impedance_force_ +=
+        (gain_derivative * err_vel_.toVector().array()).matrix();
+    impedance_force_ -=
         (gain_feed_forward_force * feed_forward_force.toVector().array())
             .matrix();
 
@@ -116,12 +129,8 @@ void ImpedanceController::run(
                                 end_frame_index_,
                                 pinocchio::LOCAL_WORLD_ALIGNED,
                                 end_jacobian_);
-    pinocchio::getFrameJacobian(pinocchio_model_,
-                                pinocchio_data_,
-                                root_frame_index_,
-                                pinocchio::LOCAL_WORLD_ALIGNED,
-                                root_jacobian_);
-    impedance_jacobian_ = end_jacobian_;// - root_jacobian_;
+
+    impedance_jacobian_ = end_jacobian_;
 
     // compute the output torques
     torques_ = (impedance_jacobian_.transpose() * impedance_force_);
