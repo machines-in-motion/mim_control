@@ -1,9 +1,19 @@
+#
+# License BSD-3-Clause
+# Copyright (c) 2020, New York University and Max Planck Gesellschaft.
+#
+
 impedance_controllers:
   FL_imp:
     frame_root_name: FL_HFE
     frame_end_name: FL_FOOT
-    is_eeff: 1.0             #Whether or not an impdance controller is associated with a specific end-effector
-    start_column: 6         #Start column of jacobian in pinocchio. In the future this should be found when setting up the controllers instead of hardcoded
+    # Whether or not an impedance controller is associated with a
+    # specific end-effector
+    is_eeff: 1.0
+    # Start column of jacobian in pinocchio.
+    # In the future this should be found when setting up the controllers
+    # instead of hardcoded.
+    start_column: 6
     active_joints: [True, True, True]
   FR_imp:
     frame_root_name: FR_HFE

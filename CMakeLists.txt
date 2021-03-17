@@ -48,10 +48,13 @@ endif()
 # Create the main library
 #
 
+# cmake-format: off
 add_library(
   ${PROJECT_NAME} SHARED
-  src/impedance_controller.cpp src/centroidal_pd_controller.cpp
+  src/impedance_controller.cpp
+  src/centroidal_pd_controller.cpp
   src/centroidal_force_qp_controller.cpp)
+# cmake-format: on
 target_link_libraries(${PROJECT_NAME} pinocchio::pinocchio)
 target_link_libraries(${PROJECT_NAME} Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME} eiquadprog::eiquadprog)
@@ -118,11 +121,14 @@ install(DIRECTORY include/ DESTINATION include)
 #
 # python bindings with pybind11#
 #
-pybind11_add_module(
-  ${PROJECT_NAME}_cpp MODULE srcpy/${PROJECT_NAME}.cpp
-  srcpy/impedance_controller.cpp srcpy/centroidal_pd_controller.cpp
-  srcpy/centroidal_force_qp_controller.cpp)
 
+# cmake-format: off
+pybind11_add_module(${PROJECT_NAME}_cpp MODULE
+  srcpy/${PROJECT_NAME}.cpp
+  srcpy/impedance_controller.cpp
+  srcpy/centroidal_pd_controller.cpp
+  srcpy/centroidal_force_qp_controller.cpp)
+# cmake-format: on
 target_link_libraries(${PROJECT_NAME}_cpp PRIVATE pybind11::module)
 target_link_libraries(${PROJECT_NAME}_cpp PRIVATE ${PROJECT_NAME})
 target_link_boost_python(${PROJECT_NAME}_cpp PRIVATE)
