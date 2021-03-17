@@ -1,7 +1,11 @@
 """demo_impedance_ctrl_python.py
+
 This file is the centroidal controller demo for solo12 using the C++ code.
+
+License BSD-3-Clause
+Copyright (c) 2021, New York University and Max Planck Gesellschaft.
+
 Author: Maximilien Naveau
-Date: 01/21/2021
 """
 
 import numpy as np

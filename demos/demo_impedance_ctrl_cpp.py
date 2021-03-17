@@ -14,8 +14,6 @@ from bullet_utils.env import BulletEnvWithGround
 import pybullet
 from robot_properties_solo.solo12wrapper import Solo12Robot, Solo12Config
 from mim_control_cpp import ImpedanceController
-from RAI.data_collector import DataCollector
-from RAI.session import Session
 
 
 if __name__ == "__main__":
@@ -26,9 +24,6 @@ if __name__ == "__main__":
     pybullet.resetDebugVisualizerCamera(1.3, 100, -35, (0.0, 0.0, 0.0))
     RobotConfig = Solo12Config
     pin_robot = robot.pin_robot
-
-    # create the data collector
-    data = DataCollector()
 
     # Create the control vector
     q_null = np.zeros(pin_robot.nq)
@@ -106,18 +101,4 @@ if __name__ == "__main__":
 
             time += 1
             robot.send_joint_command(tau)
-            data.add_variable(time, "time", "millisec")
-            data.add_matrix(tau, "tau", "Nm")
-            data.add_matrix(tau_pd, "tau_pd", "Nm")
-            data.add_matrix(tau_imp, "tau_imp", "Nm")
-            data.add_se3(x_des[0], "fl_pos")
-            data.add_se3(x_des[1], "fr_pos")
-            data.add_se3(x_des[2], "hl_pos")
-            data.add_se3(x_des[3], "hr_pos")
             env.step()
-
-    empty_view = {"Empty View": {0: []}}
-    my_session = Session()
-    my_session.sensors_data = data
-    my_session._prepare(empty_view)
-    my_session.launch()

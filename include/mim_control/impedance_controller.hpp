@@ -125,9 +125,6 @@ private:  // attributes
     /** @brief Index of the root frame in the pinocchio model. */
     pinocchio::FrameIndex root_frame_index_;
 
-    /** @brief Jacobian of the root frame. */
-    pinocchio::Data::Matrix6x root_jacobian_;
-
     /** @brief Measured root frame placement. */
     pinocchio::SE3 root_placement_;
 

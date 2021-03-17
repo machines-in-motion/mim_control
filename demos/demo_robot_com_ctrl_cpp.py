@@ -16,8 +16,7 @@ from mim_control_cpp import (
 )
 from bullet_utils.env import BulletEnvWithGround
 from robot_properties_solo.solo12wrapper import Solo12Robot, Solo12Config
-
-# from robot_properties_bolt.bolt_wrapper import BoltRobot, BoltConfig
+from robot_properties_bolt.bolt_wrapper import BoltRobot, BoltConfig
 
 
 def demo(robot_name):

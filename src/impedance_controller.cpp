@@ -34,8 +34,6 @@ void ImpedanceController::initialize(const pinocchio::Model& pinocchio_model,
     end_frame_index_ = pinocchio_model_.getFrameId(end_frame_name_);
 
     // initialize the size of the vectors.
-    root_jacobian_.resize(6, pinocchio_model_.nv);
-    root_jacobian_.fill(0.);
     end_jacobian_.resize(6, pinocchio_model_.nv);
     end_jacobian_.fill(0.);
     impedance_jacobian_.resize(6, pinocchio_model_.nv);
