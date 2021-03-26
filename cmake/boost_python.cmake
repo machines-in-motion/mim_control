@@ -13,13 +13,17 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# .rst: .. command:: SEARCH_FOR_BOOST_COMPONENT
+# cmake-format: off
+#.rst:
+# .. cmake:command:: SEARCH_FOR_BOOST_COMPONENT
 #
-# :param boost_python_name: :param found:
+#   :param boost_python_name:
+#   :param found:
 #
-# This function returns found to TRUE if the boost_python_name has been found,
-# FALSE otherwise. This function is for internal use only.
-#
+#   This function returns found to TRUE if the boost_python_name has been
+#   found, FALSE otherwise. This function is for internal use only.
+
+# cmake-format: on
 function(SEARCH_FOR_BOOST_COMPONENT boost_python_name found)
   set(${found}
       FALSE
@@ -45,22 +49,28 @@ if(CMAKE_VERSION VERSION_LESS "3.12")
   )
 endif(CMAKE_VERSION VERSION_LESS "3.12")
 
-# .rst: .. command:: SET_BOOST_DEFAULT_OPTIONS
+# cmake-format: off
+#.rst: 
+# .. cmake:command:: SET_BOOST_DEFAULT_OPTIONS
 #
-# This function allows to set up the default options for detecting Boost
-# components.
-#
+#    This function allows to set up the default options for detecting Boost
+#    components.
+
+# cmake-format: on
 macro(SET_BOOST_DEFAULT_OPTIONS)
   set(Boost_USE_STATIC_LIBS OFF)
   set(Boost_USE_MULTITHREADED ON)
   set(Boost_NO_BOOST_CMAKE ON)
 endmacro(SET_BOOST_DEFAULT_OPTIONS)
 
-# .rst: .. command:: EXPORT_BOOST_DEFAULT_OPTIONS
+# cmake-format: off
+#.rst:
+# .. cmake:command:: EXPORT_BOOST_DEFAULT_OPTIONS
 #
-# This function allows to export the default options for detecting Boost
-# components.
-#
+#   This function allows to export the default options for detecting Boost
+#   components.
+
+# cmake-format: on
 macro(EXPORT_BOOST_DEFAULT_OPTIONS)
   list(
     INSERT
@@ -76,14 +86,15 @@ macro(EXPORT_BOOST_DEFAULT_OPTIONS)
   )
 endmacro(EXPORT_BOOST_DEFAULT_OPTIONS)
 
+# cmake-format: off
+#.rst:
+# .. cmake:command:: SEARCH_FOR_BOOST_PYTHON([REQUIRED])
 #
-# .rst .. command:: SEARCH_FOR_BOOST_PYTHON([REQUIRED])
-#
-# Find boost-python component. For boost >= 1.67.0, FindPython macro should be
-# called first in order to automatically detect the right boost-python component
-# version according to the Python version (2.7 or 3.x).
-#
+#   Find boost-python component. For boost >= 1.67.0, FindPython macro should
+#   be called first in order to automatically detect the right boost-python
+#   component version according to the Python version (2.7 or 3.x).
 
+# cmake-format: on
 macro(SEARCH_FOR_BOOST_PYTHON)
 
   cmake_parse_arguments(_BOOST_PYTHON_REQUIRED "REQUIRED" "" "" ${ARGN})
@@ -137,21 +148,23 @@ macro(SEARCH_FOR_BOOST_PYTHON)
   list(APPEND LOGGING_WATCHED_VARIABLES Boost_PYTHON_LIBRARY)
 endmacro(SEARCH_FOR_BOOST_PYTHON)
 
-# .rst: .. command:: TARGET_LINK_BOOST_PYTHON (TARGET
-# <PRIVATE|PUBLIC|INTERFACE>)
+# cmake-format: off
+#.rst:
+# .. cmake:command:: TARGET_LINK_BOOST_PYTHON (TARGET <PRIVATE|PUBLIC|INTERFACE>)
 #
-# Link target againt boost_python library.
+#   Link target againt boost_python library.
 #
-# :target: is either a library or an executable :private,public,interface: The
-# PUBLIC, PRIVATE and INTERFACE keywords can be used to specify both the link
-# dependencies and the link interface.
-#
-# On darwin systems, boost_python is not linked against any python library. This
-# linkage is resolved at execution time via the python interpreter. We then need
-# to stipulate that boost_python has unresolved symbols at compile time for a
-# library target. Otherwise, for executables we need to link to a specific
-# version of python.
-#
+#   :target: is either a library or an executable :private,public,interface: The
+#   PUBLIC, PRIVATE and INTERFACE keywords can be used to specify both the link
+#   dependencies and the link interface.
+#  
+#   On darwin systems, boost_python is not linked against any python library.
+#   This linkage is resolved at execution time via the python interpreter. We
+#   then need to stipulate that boost_python has unresolved symbols at compile
+#   time for a library target. Otherwise, for executables we need to link to a
+#   specific version of python.
+
+# cmake-format: on
 macro(TARGET_LINK_BOOST_PYTHON target)
   if(${ARGC} GREATER 1)
     set(PUBLIC_KEYWORD ${ARGV1})
