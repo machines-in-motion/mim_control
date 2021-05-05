@@ -1,20 +1,21 @@
-Readme
-------
-
-### What it is
+mim_control
+-----------
 
 This packages contains generic controllers that can be used for a biped, quadruped, hopper and any other robot. The controllers are created based on the nature of the robot and its properties such as number of end effectors etc..
 
-### Dependencies
+### Installation
+
+#### Dependencies
 ```
 - Pinocchio
 - PyBullet
 - Quadprog
 - Matplotlib (Optional, needed to run demos)
+- BulletUtils (Optional, needed to run demos)
 - Robot_Properties_Solo (Optional, needed to run demos)
 - Robot_Properties_Bolt (Optional, needed to run demos)
 ```
-### Installation
+#### Download the package
 
 External dependencies:
 See [this tutorial](https://github.com/machines-in-motion/machines-in-motion.github.io/wiki/laas_package_from_binaries)
@@ -28,10 +29,31 @@ cd devel
 git clone git@github.com:machines-in-motion/treep_machines_in_motion
 pip install -U treep
 treep --clone MIM_CONTROL
+```
+
+#### Build the package
+
+We use [colcon](https://github.com/machines-in-motion/machines-in-motion.github.io/wiki/use_colcon)
+to build this package:
+
+```
+cd devel/workspace
 colcon build
 ```
 
-### Running Demos
+### Usage
+
+#### Running Demos
+
+To run the demos, please install the following additinal packages:
+
+```
+treep --clone bullet_utils
+treep --clone robot_properties_solo
+```
+
+rebuild your workspace using `colcon build` and source it.
+
 To run the impedance controller on Solo12 follow the below mentioned steps 
 ```
 source /opt/openrobots/setup.bash (source open robots)
@@ -45,11 +67,6 @@ source /opt/openrobots/setup.bash (source open robots)
 cd demo
 python3 demo_robot_com_ctrl.py
 ```
-
-### Authors
-- Avadesh Meduri
-- Paarth Shaah 
-- Julian Viereck
 
 ### Cite
 ```
@@ -65,12 +82,8 @@ python3 demo_robot_com_ctrl.py
 }
 ```
 
-### Copyrights
-
-Copyright(c) 2019-2020 New York University, Max Planck Gesellschaft
-
-### License
+### License and Copyrights
 
 BSD 3-Clause License
 
-
+Copyright(c) 2019-2020 New York University, Max Planck Gesellschaft
