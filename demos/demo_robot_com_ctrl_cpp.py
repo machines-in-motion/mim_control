@@ -26,7 +26,8 @@ def demo(robot_name):
 
     # Create a robot instance in the simulator.
     if robot_name == "solo":
-        robot = env.add_robot(Solo12Robot)
+        robot = Solo12Robot()
+        robot = env.add_robot(robot)
         robot_config = Solo12Config()
         mu = 0.2
         kc = [200, 200, 200]
@@ -35,7 +36,8 @@ def demo(robot_name):
         db = [50.0, 50.0, 200.0]
         qp_penalty_weights = [5e5, 5e5, 5e5, 1e6, 1e6, 1e6]
     elif robot_name == "bolt":
-        robot = env.add_robot(BoltRobot)
+        robot = BoltRobot()
+        robot = env.add_robot(robot)
         robot_config = BoltConfig()
         mu = 0.2
         kc = [0, 0, 100]
@@ -114,7 +116,8 @@ def demo(robot_name):
         # Read the final state and forces after the stepping.
         q, dq = robot.get_state()
 
-	quat = pin.Quaternion(q[6], q[3], q[4], q[5])
+        quat = pinocchio.Quaternion(q[6], q[3], q[4], q[5])
+        quat.normalize()
 
         # computing forces to be applied in the centroidal space
         centrl_pd_ctrl.run(

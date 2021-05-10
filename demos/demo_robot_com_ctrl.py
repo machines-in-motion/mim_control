@@ -22,7 +22,8 @@ def demo(robot_name):
 
     # Create a robot instance in the simulator.
     if robot_name == "solo":
-        robot = env.add_robot(Solo12Robot)
+        robot = Solo12Robot()
+        robot = env.add_robot(robot)
         robot_config = Solo12Config()
         mu = 0.2
         kc = [200, 200, 200]

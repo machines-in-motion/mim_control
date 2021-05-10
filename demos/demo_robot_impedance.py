@@ -22,10 +22,12 @@ def demo(robot_name):
 
     # Create a robot instance in the simulator.
     if robot_name == "solo":
-        robot = env.add_robot(Solo12Robot)
+        robot = Solo12Robot()
+        robot = env.add_robot(robot)
         robot_config = Solo12Config()
     elif robot_name == "bolt":
-        robot = env.add_robot(BoltRobot)
+        robot = BoltRobot()
+        robot = env.add_robot(robot)
         robot_config = BoltConfig()
     else:
         raise RuntimeError(

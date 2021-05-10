@@ -22,7 +22,8 @@ if __name__ == "__main__":
 
     # Create a Pybullet simulation environment
     env = BulletEnvWithGround()
-    robot = env.add_robot(Solo12Robot, useFixedBase=False)
+    robot = Solo12Robot()
+    robot = env.add_robot(robot)
     pybullet.resetDebugVisualizerCamera(1.3, 100, -35, (0.0, 0.0, 0.0))
     RobotConfig = Solo12Config
     pin_robot = robot.pin_robot
