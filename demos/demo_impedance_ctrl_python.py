@@ -44,20 +44,21 @@ if __name__ == "__main__":
     ]
 
     # Des state and gains
+    z_des = -0.2
     x_des = np.array(
         [
             0.195,
             0.147,
-            -0.1,
+            z_des,
             0.195,
             -0.147,
-            -0.1,
+            z_des,
             -0.195,
             0.147,
-            -0.1,
+            z_des,
             -0.195,
             -0.147,
-            -0.1,
+            z_des,
         ]
     )
     xd_des = np.zeros(3)
@@ -74,7 +75,7 @@ if __name__ == "__main__":
 
     q0[0] = 0.0
     q0[1] = 0.0
-    q0[2] = 0.4
+    q0[2] = -z_des
     q0[3:7] = np.array([0, 0, 0, 1])
 
     robot.reset_state(q0, dq0)
