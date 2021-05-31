@@ -172,6 +172,9 @@ class WholeBodyController:
     def trace(self, robot=None):
         if robot is None:
             robot = self.robot
+        if robot is None:
+            print ("WholeBodyController.trace(): No robot given, cannot trace the data.")
+            return
 
         robot.add_trace(self.prefix + '_q', 'sout')
         robot.add_trace(self.prefix + '_dq', 'sout')
@@ -185,22 +188,35 @@ class WholeBodyController:
 
 
     def plug(self, robot, base_position, base_velocity):
+        self.plug_all_signals(
+            robot.device.joint_positions,
+            robot.device.joint_velocities,
+            base_position,
+            base_velocity,
+            robot.device.ctrl_joint_torques
+        )
+    
+    def plug_all_signals(
+        self,
+        joint_positions_sout,
+        joint_velocities_sout,
+        base_position_sout,
+        base_velocity_sout,
+        ctrl_joint_torque_sin
+    ):
         # Args:
         #   robot; DGM robot device
         #   base_position: The base position as a 7 dim vector signal
         #   base_velocity: The base velocity as a 6 dim vector signal
 
-        self.robot = robot
-
         # Create the input to the dg_robot.
-        base_pose_rpy = basePoseQuat2PoseRPY(base_position)
-        base_velocity = base_velocity
+        base_pose_rpy = basePoseQuat2PoseRPY(base_position_sout)
 
         position = stack_two_vectors(
-            base_pose_rpy, robot.device.joint_positions, 6, self.nv - 6
+            base_pose_rpy, joint_positions_sout, 6, self.nv - 6
         )
         velocity = stack_two_vectors(
-            base_velocity, robot.device.joint_velocities, 6, self.nv - 6,
+            base_velocity_sout, joint_velocities_sout, 6, self.nv - 6,
             self.prefix + '_dq'
         )
 
@@ -215,7 +231,7 @@ class WholeBodyController:
 
         # Create the input to the impedance controllers.
         position = stack_two_vectors(
-            base_position, robot.device.joint_positions, 7, self.nv - 6,
+            base_position_sout, joint_positions_sout, 7, self.nv - 6,
             self.prefix + '_q'
         )
         for imp in self.imps:
@@ -232,16 +248,16 @@ class WholeBodyController:
         )
 
         dg.plug(
-            selec_vector(base_position, 3, 7),
+            selec_vector(base_position_sout, 3, 7),
             self.wcom_pd_ctrl.actual_base_orientation_sin,
         )
         dg.plug(
-            selec_vector(base_velocity, 3, 6),
+            selec_vector(base_velocity_sout, 3, 6),
             self.wcom_pd_ctrl.actual_base_angular_velocity_sin,
         )
 
         # Finally, plug the computed torques to the output.
-        dg.plug(self.joint_torques_sout, robot.device.ctrl_joint_torques)
+        dg.plug(self.joint_torques_sout, ctrl_joint_torque_sin)
 
     def plug_base_as_com(self, base_position, base_velocity_world):
         """ Instead of the COM use the base as com. """

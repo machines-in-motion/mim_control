@@ -41,7 +41,7 @@ class GoTo(object):
         """ Set the curve goal. set(vector (goal), int (duration)) """
         if len(desired_joint_position_rad) != self._nb_dof:
             print(
-                "Warning: Wrong number of input joint positions, ",
+                "Warning: Wrong number of input desired joint positions, ",
                 "nothing to be done",
             )
             return
