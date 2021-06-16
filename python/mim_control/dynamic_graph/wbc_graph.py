@@ -185,7 +185,19 @@ class WholeBodyController:
 
             # Desired position of the endeffector.
             robot.add_trace(imp.name, 'desired_end_frame_placement_sin')
-
+        
+        for imp in self.imps:
+            robot.add_trace(imp.name, "torque_sout")
+            robot.add_trace(imp.name, "joint_torque_sout")
+            robot.add_trace(imp.name, "impedance_force")
+            robot.add_trace(imp.name, "robot_configuration_sin")
+            robot.add_trace(imp.name, "robot_velocity_sin")
+            robot.add_trace(imp.name, "gain_proportional_sin")
+            robot.add_trace(imp.name, "gain_derivative_sin")
+            robot.add_trace(imp.name, "gain_feed_forward_force_sin")
+            robot.add_trace(imp.name, "desired_end_frame_placement_sin")
+            robot.add_trace(imp.name, "desired_end_frame_velocity_sin")
+            robot.add_trace(imp.name, "feed_forward_force_sin")
 
     def plug(self, robot, base_position, base_velocity):
         self.plug_all_signals(
