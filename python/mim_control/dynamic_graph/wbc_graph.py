@@ -184,9 +184,6 @@ class WholeBodyController:
             robot.add_trace(self.prefix + '_pos_' + eff_name, 'sout')
 
             # Desired position of the endeffector.
-            robot.add_trace(imp.name, 'desired_end_frame_placement_sin')
-        
-        for imp in self.imps:
             robot.add_trace(imp.name, "torque_sout")
             robot.add_trace(imp.name, "joint_torque_sout")
             robot.add_trace(imp.name, "impedance_force")

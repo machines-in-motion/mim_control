@@ -9,12 +9,32 @@
  */
 
 #include "mim_control/centroidal_pd_controller.hpp"
+#include "pinocchio/math/rpy.hpp"
 #include "pinocchio/spatial/explog.hpp"
 
 namespace mim_control
 {
 CentroidalPDController::CentroidalPDController()
 {
+    wrench_.setZero();
+    wrench_local_.setZero();
+
+    mass_ = 0.0;
+    inertia_.setZero();
+
+    pos_error_.setZero();
+    vel_error_.setZero();
+    ori_error_.setZero();
+    angvel_error_.setZero();
+
+    ori_quat_.setIdentity();
+    des_ori_quat_.setIdentity();
+
+    ori_rot_mat_.setIdentity();
+    des_ori_rot_mat_.setIdentity();
+    ori_yaw_.setZero();
+
+    world_R_local_.setIdentity();
 }
 
 void CentroidalPDController::initialize(
@@ -37,48 +57,63 @@ void CentroidalPDController::run(Eigen::Ref<const Eigen::Vector3d> kc,
                                  Eigen::Ref<const Eigen::Vector3d> angvel,
                                  Eigen::Ref<const Eigen::Vector3d> angvel_des)
 {
+    /*
+     * Convert inputs.
+     */
+    // Normalize the quaternion
+    des_ori_quat_.x() = ori_des[0];
+    des_ori_quat_.y() = ori_des[1];
+    des_ori_quat_.z() = ori_des[2];
     des_ori_quat_.w() = ori_des[3];
-    des_ori_quat_.vec()[0] = ori_des[0];
-    des_ori_quat_.vec()[1] = ori_des[1];
-    des_ori_quat_.vec()[2] = ori_des[2];
-
+    des_ori_quat_.normalize();
+    // idem.
+    ori_quat_.x() = ori[0];
+    ori_quat_.y() = ori[1];
+    ori_quat_.z() = ori[2];
     ori_quat_.w() = ori[3];
-    ori_quat_.vec()[0] = ori[0];
-    ori_quat_.vec()[1] = ori[1];
-    ori_quat_.vec()[2] = ori[2];
+    ori_quat_.normalize();
 
-    des_ori_se3_ = des_ori_quat_.toRotationMatrix();
-    ori_se3_ = ori_quat_.toRotationMatrix();
+    // Convert to rotation matrix.
+    des_ori_rot_mat_ = des_ori_quat_.toRotationMatrix();
+    ori_rot_mat_ = ori_quat_.toRotationMatrix();
 
-    /*************************************************************************/
-    // Compute the linear part of the wrench.
+    /*
+     * Create the control frame.
+     */
+    ori_yaw_ = pinocchio::rpy::matrixToRpy(ori_rot_mat_);
+    ori_yaw_.head<2>().setZero();
+    world_R_local_ = pinocchio::rpy::rpyToMatrix(ori_yaw_);
+    world_R_local_.setIdentity();
 
-    /*---------- computing position error ----*/
-    pos_error_.array() = com_des.array() - com.array();
-    vel_error_.array() = vcom_des.array() - vcom.array();
-    /*---------- computing tourques ----*/
+    /*
+     * Compute the linear part of the wrench.
+     */
+    // Compute linear error.
+    pos_error_.array() = /*world_R_local_.transpose() * */ (com_des - com);
+    vel_error_.array() = /*world_R_local_.transpose() * */ (vcom_des - vcom);
+    // Compute linear wrench.
+    wrench_local_.head<3>().array() = mass_ * (kc.array() * pos_error_.array() +
+                                         dc.array() * vel_error_.array());
 
-    wrench_.head<3>().array() = mass_ * (pos_error_.array() * kc.array() +
-                                         vel_error_.array() * dc.array());
+    /*
+     * Compute the angular part of the wrench.
+     */
+    // Compute angular error.
+    ori_error_ =
+        /*world_R_local_.transpose() * */
+        pinocchio::quaternion::log3(des_ori_quat_ * ori_quat_.conjugate());
+    angvel_error_ = /*world_R_local_.transpose() * */
+                    ((des_ori_rot_mat_ * angvel_des) - (ori_rot_mat_ * angvel));
+    // Compute amgular wrench.
+    wrench_local_.tail<3>().array() =
+        kb.array() * ori_error_.array() +
+        db.array() * inertia_.array() * angvel_error_.array();
 
-    /*************************************************************************/
-    // Compute the angular part of the wrench.
-    ori_error_se3_ = des_ori_se3_.transpose() * ori_se3_;
-    ori_error_quat_ = ori_error_se3_;
-
-    ori_error_ = pinocchio::quaternion::log3(des_ori_quat_ * ori_quat_.conjugate());
-
-    /*---------- computing ang error ----*/
-
-    // Rotate the des and current angular velocity into the world frame.
-    angvel_world_error_ = ori_se3_ * angvel;
-    des_angvel_world_error_ = des_ori_se3_ * angvel_des;
-
-    wrench_.tail<3>().array() =
-        db.array() * inertia_.array() * (
-            des_angvel_world_error_.array() - angvel_world_error_.array()
-        ) +
-        kb.array() * ori_error_.array();
+    /*
+     * Convert the wrench back into the world frame.
+     */
+    wrench_.head<3>() = /* world_R_local_ * */ wrench_local_.head<3>();
+    wrench_.tail<3>() = /* world_R_local_ * */ wrench_local_.tail<3>();
 }
 
 Vector6d& CentroidalPDController::get_wrench()

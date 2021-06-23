@@ -62,6 +62,7 @@ public:
 private:  // attributes
     /** @brief Output wrench */
     Vector6d wrench_;
+    Vector6d wrench_local_;
 
     double mass_;
     Eigen::Vector3d inertia_;
@@ -69,18 +70,19 @@ private:  // attributes
     Eigen::Vector3d pos_error_;
     Eigen::Vector3d vel_error_;
     Eigen::Vector3d ori_error_;
-
-    Eigen::Vector3d angvel_world_error_;
-    Eigen::Vector3d des_angvel_world_error_;
+    Eigen::Vector3d angvel_error_;
 
     Eigen::Quaternion<double> ori_quat_;
     Eigen::Quaternion<double> des_ori_quat_;
-    Eigen::Quaternion<double> ori_error_quat_;
 
-    Eigen::Matrix<double, 3, 3> ori_se3_;
-    Eigen::Matrix<double, 3, 3> des_ori_se3_;
-    Eigen::Matrix<double, 3, 3>
-        ori_error_se3_;  // refer to christian ott paper for definitions (Rdb)
+    Eigen::Matrix<double, 3, 3> ori_rot_mat_;
+    Eigen::Matrix<double, 3, 3> des_ori_rot_mat_;
+    Eigen::Vector3d ori_yaw_;
+
+    Eigen::Matrix<double, 3, 3> world_R_local_;
+
+    /** @brief refer to christian ott paper for definitions (Rdb) */
+    
 };
 
 }  // namespace mim_control
