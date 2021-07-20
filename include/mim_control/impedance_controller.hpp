@@ -90,6 +90,31 @@ public:
              const pinocchio::Motion& desired_end_frame_velocity,
              const pinocchio::Force& feed_forward_force);
 
+
+    /**
+     * @brief Similar to `run()` but with the data already precomputed.
+     *
+     * @param pinocchio_data The data object to use for the computation.
+     * @param gain_proportional 6d vector for the proportional gains on {x, y,
+     * z, roll, pitch, yaw}.
+     * @param gain_derivative 6d vector for the proportional gains on {x, y, z,
+     * roll, pitch, yaw}.
+     * @param gain_feed_forward_force gain multiplying the feed forward force.
+     * @param desired_end_frame_placement desired end frame placement relative
+     * to the desired root joint.
+     * @param desired_end_frame_velocity desired end frame velocity relative to
+     * the desired root joint.
+     * @param feed_forward_force feed forward force applied to the foot by the
+     * environment.
+     */
+    void run_precomputed_data(pinocchio::Data& pinocchio_data,
+                              Eigen::Ref<const Array6d> gain_proportional,
+                              Eigen::Ref<const Array6d> gain_derivative,
+                              const double& gain_feed_forward_force,
+                              const pinocchio::SE3& desired_end_frame_placement,
+                              const pinocchio::Motion& desired_end_frame_velocity,
+                              const pinocchio::Force& feed_forward_force);
+
     /**
      * @brief Get the computed torques from the impedance controller.
      *
@@ -110,6 +135,13 @@ public:
      * @return Vector6d&
      */
     const Vector6d& get_impedance_force();
+
+    /**
+     * @brief Returns the index of the endeffector frame.
+     *
+     * @return pinocchio::FrameIndex
+     */
+    const pinocchio::FrameIndex& get_endframe_index();
 
 private:  // attributes
     /** @brief Rigid body dynamics model. */

@@ -16,8 +16,9 @@ from mim_control_cpp import (
 )
 from bullet_utils.env import BulletEnvWithGround
 from robot_properties_solo.solo12wrapper import Solo12Robot, Solo12Config
-from robot_properties_bolt.bolt_wrapper import BoltRobot, BoltConfig
+# from robot_properties_bolt.bolt_wrapper import BoltRobot, BoltConfig
 
+import time
 
 def demo(robot_name):
 
@@ -81,7 +82,7 @@ def demo(robot_name):
     robot.reset_state(q0, dq0)
 
     # Desired center of mass position and velocity.
-    x_com = [0.0, 0.0, 0.18]
+    x_com = [0.0, 0.0, 0.25]
     xd_com = [0.0, 0.0, 0.0]
     # The base should be flat.
     x_ori = [0.0, 0.0, 0.0, 1.0]
@@ -110,14 +111,18 @@ def demo(robot_name):
     ]
     xd_des = pinocchio.Motion(np.zeros(3), np.zeros(3))
 
-    # Run the simulator for 100 steps
-    for _ in range(4000):
+    # Run the simulator for N steps
+    N = 4000
+    dur = 0.
+    for _ in range(N):
 
         # Read the final state and forces after the stepping.
         q, dq = robot.get_state()
 
         quat = pinocchio.Quaternion(q[6], q[3], q[4], q[5])
         quat.normalize()
+
+        start = time.time()
 
         # computing forces to be applied in the centroidal space
         centrl_pd_ctrl.run(
@@ -158,18 +163,23 @@ def demo(robot_name):
                 kd,
                 1.0,
                 pinocchio.SE3(np.eye(3), np.array(x_des[3 * i : 3 * (i + 1)])),
-                xd_des,
+                pinocchio.Motion(xd_des),
                 pinocchio.Force(
                     np.array(ee_forces[3 * i : 3 * (i + 1)]), np.zeros(3)
                 ),
             )
             tau += imp_ctrl.get_joint_torques()
+
+        dur += time.time() - start
+
         # passing torques to the robot
         robot.send_joint_command(tau)
         # Step the simulator.
         env.step(
             sleep=False
         )  # You can sleep here if you want to slow down the replay
+
+    print('Control path: %0.3f ms' % (dur * 1000. / N))
 
 
 if __name__ == "__main__":

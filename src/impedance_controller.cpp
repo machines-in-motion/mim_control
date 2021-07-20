@@ -23,11 +23,13 @@ void ImpedanceController::initialize(const pinocchio::Model& pinocchio_model,
 {
     // Copy the arguments internally.
     pinocchio_model_ = pinocchio_model;
-    root_frame_name_ = root_frame_name;
-    end_frame_name_ = end_frame_name;
 
     // Create the cache of the rigid body dynamics algorithms
     pinocchio_data_ = pinocchio::Data(pinocchio_model_);
+
+    // Copy the arguments internally.
+    root_frame_name_ = root_frame_name;
+    end_frame_name_ = end_frame_name;
 
     // Fetch the index of the frame in the robot model.
     root_frame_index_ = pinocchio_model_.getFrameId(root_frame_name_);
@@ -81,12 +83,35 @@ void ImpedanceController::run(
     pinocchio::updateFramePlacement(
         pinocchio_model_, pinocchio_data_, end_frame_index_);
 
-    root_placement_ = pinocchio_data_.oMf[root_frame_index_];
-    end_placement_ = pinocchio_data_.oMf[end_frame_index_];
+    // Compute the jacobians
+    pinocchio::computeJointJacobians(
+        pinocchio_model_, pinocchio_data_, robot_configuration);
+
+    run_precomputed_data(pinocchio_data_,
+        gain_proportional,
+        gain_derivative,
+        gain_feed_forward_force,
+        desired_end_frame_placement,
+        desired_end_frame_velocity,
+        feed_forward_force
+    );
+}
+
+void ImpedanceController::run_precomputed_data(
+    pinocchio::Data& pinocchio_data,
+    Eigen::Ref<const Array6d> gain_proportional,
+    Eigen::Ref<const Array6d> gain_derivative,
+    const double& gain_feed_forward_force,
+    const pinocchio::SE3& desired_end_frame_placement,
+    const pinocchio::Motion& desired_end_frame_velocity,
+    const pinocchio::Force& feed_forward_force)
+{
+    root_placement_ = pinocchio_data.oMf[root_frame_index_];
+    end_placement_ = pinocchio_data.oMf[end_frame_index_];
     root_velocity_ = pinocchio::getFrameVelocity(
-        pinocchio_model_, pinocchio_data_, root_frame_index_, pinocchio::WORLD);
+        pinocchio_model_, pinocchio_data, root_frame_index_, pinocchio::WORLD);
     end_velocity_ = pinocchio::getFrameVelocity(
-        pinocchio_model_, pinocchio_data_, end_frame_index_, pinocchio::WORLD);
+        pinocchio_model_, pinocchio_data, end_frame_index_, pinocchio::WORLD);
 
     // Orientations
     root_orientation_.rotation() = root_placement_.rotation();
@@ -119,11 +144,9 @@ void ImpedanceController::run(
         (gain_feed_forward_force * feed_forward_force.toVector().array())
             .matrix();
 
-    // Compute the jacobians
-    pinocchio::computeJointJacobians(
-        pinocchio_model_, pinocchio_data_, robot_configuration);
+    // Get the jacobian.
     pinocchio::getFrameJacobian(pinocchio_model_,
-                                pinocchio_data_,
+                                pinocchio_data,
                                 end_frame_index_,
                                 pinocchio::LOCAL_WORLD_ALIGNED,
                                 end_jacobian_);
@@ -155,6 +178,11 @@ const Eigen::VectorXd& ImpedanceController::get_joint_torques()
 const ImpedanceController::Vector6d& ImpedanceController::get_impedance_force()
 {
     return impedance_force_;
+}
+
+const pinocchio::FrameIndex& ImpedanceController::get_endframe_index()
+{
+    return end_frame_index_;
 }
 
 }  // namespace mim_control
