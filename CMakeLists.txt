@@ -82,7 +82,8 @@ if(${build_dynamic_graph_plugins})
   # Add the include dependencies.
   target_include_directories(
     ${plugin_name} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-                          $<INSTALL_INTERFACE:include>)
+                          $<INSTALL_INTERFACE:include>
+                          ${pybind11_INCLUDE_DIRS})
   # Link the dependencies.
   target_link_libraries(${plugin_name} ${PROJECT_NAME})
   target_link_libraries(${plugin_name} dynamic-graph::dynamic-graph)

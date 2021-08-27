@@ -39,7 +39,7 @@ class GoTo(object):
 
     def go_to(self, desired_joint_position_rad, nb_iteration):
         """ Set the curve goal. set(vector (goal), int (duration)) """
-        if len(desired_joint_position_rad) != self._nb_dof:
+        if np.array(desired_joint_position_rad).size != self._nb_dof:
             print(
                 "Warning: Wrong number of input desired joint positions, ",
                 "nothing to be done",
@@ -47,7 +47,7 @@ class GoTo(object):
             return
         else:
             return self._smooth_reach.set(
-                desired_joint_position_rad, nb_iteration
+                np.array(desired_joint_position_rad), nb_iteration
             )
 
     def freeze(self):
