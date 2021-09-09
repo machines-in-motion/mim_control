@@ -21,7 +21,7 @@ find_package(yaml_utils REQUIRED)
 find_package(mpi_cmake_modules REQUIRED)
 
 # External dependencies Extract major/minor python version
-find_package(Python ${PYTHON_VERSION_STRING} REQUIRED)
+find_package(Python REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(pinocchio REQUIRED)
