@@ -13,11 +13,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 #
-# Local include module.
-#
-include(cmake/boost_python.cmake)
-
-#
 # Search for dependencies.
 #
 
@@ -33,6 +28,7 @@ find_package(pinocchio REQUIRED)
 find_package(eiquadprog REQUIRED)
 
 # Specific search of boost python as it is yet not trivial.
+include(cmake/boost_python.cmake)
 search_for_boost_python()
 
 # Optionnal
