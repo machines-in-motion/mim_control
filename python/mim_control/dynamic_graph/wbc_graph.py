@@ -171,10 +171,11 @@ class WholeBodyController:
 
     def trace(self, robot=None):
         if robot is None:
-            robot = self.robot
-        if robot is None:
-            print ("WholeBodyController.trace(): No robot given, cannot trace the data.")
-            return
+            try:
+                robot = self.robot
+            except:
+                print("WholeBodyController.trace(): No robot given, cannot trace the data.")
+                return
 
         robot.add_trace(self.prefix + '_q', 'sout')
         robot.add_trace(self.prefix + '_dq', 'sout')
