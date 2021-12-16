@@ -92,6 +92,7 @@ private:
     /** @brief Cache of the rigid body dynamics algorithms. */
     pinocchio::Data pinocchio_data_;
 
+    double mass_;
     Eigen::Vector3d kc_;
     Eigen::Vector3d dc_;
     Eigen::Vector3d kb_;

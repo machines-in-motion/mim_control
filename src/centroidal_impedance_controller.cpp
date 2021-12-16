@@ -36,6 +36,7 @@ void CentroidalImpedanceController::initialize(
     bool is_free_flyer =
         pinocchio_model.joints[1].shortname() == "JointModelFreeFlyer";
 
+    mass_ = mass; 
     kc_ = kc;
     dc_ = dc;
     kb_ = kb;
@@ -119,7 +120,7 @@ void CentroidalImpedanceController::run(
         angvel, angvel_des);
 
     Vector6d& w_com = centroidal_pd_controller_.get_wrench();
-
+    w_com(2) += 9.81*mass_; 
     //////
     // Compute the forces at the endeffectors.
 
