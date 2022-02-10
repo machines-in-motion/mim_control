@@ -50,6 +50,7 @@ To run the demos, please install the following additinal packages:
 ```
 treep --clone bullet_utils
 treep --clone robot_properties_solo
+treep --clone robot_properties_bolt
 ```
 
 rebuild your workspace using `colcon build` and source it.
