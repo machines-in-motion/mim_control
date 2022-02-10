@@ -72,8 +72,7 @@ def demo(robot_name):
     x_des = robot.nb_ee * [0.0, 0.0, -q0[2].item()]  # Desired leg length
     xd_des = robot.nb_ee * [0.0, 0.0, 0.0]
 
-    # config_file = "./solo_impedance.yaml"
-    config_file = robot_config.paths["imp_ctrl_yaml"]
+    config_file = robot_config.ctrl_path
     robot_cent_ctrl = RobotCentroidalController(
         robot_config,
         mu=mu,

@@ -55,8 +55,7 @@ def demo(robot_name):
     f = np.zeros(robot.nb_ee * 3)
     f = robot.nb_ee * [0.0, 0.0, (robot_config.mass * 9.8) / 4]
 
-    # config_file = "./solo_impedance.yaml"
-    config_file = robot_config.paths["imp_ctrl_yaml"]
+    config_file = robot_config.ctrl_path
     robot_leg_ctrl = RobotImpedanceController(robot, config_file)
 
     # Run the simulator for 100 steps
