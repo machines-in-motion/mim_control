@@ -132,7 +132,6 @@ class ImpedanceController(object):
         assert np.shape(f) == (3,)
         assert np.shape(kp) == (3,)
         assert np.shape(kd) == (3,)
-
         #### Reshaping values to desired shapes
 
         x_des = np.array(x_des)
@@ -152,10 +151,9 @@ class ImpedanceController(object):
             self.start_column : self.start_column + len(self.active_joints),
         ]
         jac = jac[:, self.active_joints]
-
         # Store force for learning project.
         self.F_ = (
-            f + np.matmul(kp, (x - x_des)) + np.matmul(kd, (xd - xd_des).T).T
+            f + np.matmul(kp, (x - x_des).T) + np.matmul(kd, (xd - xd_des).T).T
         )
         tau = -jac.T.dot(self.F_.T)
         final_tau = []

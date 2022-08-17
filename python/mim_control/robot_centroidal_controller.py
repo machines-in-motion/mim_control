@@ -66,8 +66,18 @@ class RobotCentroidalController:
         m = self.robot_mass
         robot = self.pin_robot_wrapper
 
-        com = np.reshape(np.array(q[0:3]), (3,))
-        vcom = np.reshape(np.array(dq[0:3]), (3,))
+        self.pin_robot_wrapper.framesForwardKinematics(q)
+        pin.forwardKinematics(self.pin_robot_wrapper.model, self.pin_robot_wrapper.data, q)
+        pin.computeJointJacobians(self.pin_robot_wrapper.model, self.pin_robot_wrapper.data)
+        pin.updateFramePlacements(self.pin_robot_wrapper.model, self.pin_robot_wrapper.data)
+        pin.centerOfMass(self.pin_robot_wrapper.model, self.pin_robot_wrapper.data, q)
+        com = self.pin_robot_wrapper.data.com[0]
+
+        pin.computeCentroidalMomentum(self.pin_robot_wrapper.model, self.pin_robot_wrapper.data)
+        vcom = np.array(self.pin_robot_wrapper.data.hg)[:3]/m
+
+        com = np.reshape(np.array(com), (3,))
+        vcom = np.reshape(np.array(vcom), (3,))
         Ib = robot.mass(q)[3:6, 3:6]
 
         quat_diff = self.quaternion_difference(arr(q[3:7]), arr(des_ori))
@@ -84,7 +94,7 @@ class RobotCentroidalController:
         cur_angvel = quat_cur.dot(cur_angvel)
 
         # Rotate the base velocity into global frame as well.
-        vcom = quat_cur.dot(vcom)
+        #vcom = quat_cur.dot(vcom)
 
         w_com = np.hstack(
             [
@@ -101,7 +111,6 @@ class RobotCentroidalController:
 
         # adding weight
         w_com[2] += m * 9.81
-
         return w_com
 
     def compute_force_qp(self, q, dq, cnt_array, w_com):
