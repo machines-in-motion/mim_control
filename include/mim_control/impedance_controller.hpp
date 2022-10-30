@@ -143,6 +143,47 @@ public:
      */
     const pinocchio::FrameIndex& get_endframe_index();
 
+    /**
+     * @brief Similar to run(), but desired_end_frame_placement and 
+     * desired_end_frame_velocity are in the root joint frame
+     *
+     * @param robot_configuration robot generalized coordinates configuration.
+     * @param robot_velocity robot generalized coordinates velocity.
+     * @param gain_proportional 6d vector for the proportional gains on {x, y,
+     * z, roll, pitch, yaw}.
+     * @param gain_derivative 6d vector for the proportional gains on {x, y, z,
+     * roll, pitch, yaw}.
+     * @param gain_feed_forward_force gain multiplying the feed forward force.
+     * @param desired_end_frame_placement desired end frame placement relative
+     * to the desired root joint.
+     * @param desired_end_frame_velocity desired end frame velocity relative to
+     * the desired root joint.
+     * @param feed_forward_force feed forward force applied to the foot by the
+     * environment.
+     */
+    void run_local(Eigen::Ref<const Eigen::VectorXd> robot_configuration,
+                    Eigen::Ref<const Eigen::VectorXd> robot_velocity,
+                    Eigen::Ref<const Array6d> gain_proportional,
+                    Eigen::Ref<const Array6d> gain_derivative,
+                    const double& gain_feed_forward_force,
+                    const pinocchio::SE3& desired_end_frame_placement,
+                    const pinocchio::Motion& desired_end_frame_velocity,
+                    const pinocchio::Force& feed_forward_force);
+
+    /**
+     * @brief computes the velocity of the end_frame with respect to a frame
+        whose origin aligns with the root frame but is oriented as the world frame. 
+        Note: To use it, you must call a pinocchio forward kinematics function before.
+        Used in the run_local() method.
+     *
+     * @param pinocchio_data The data object to use for the computation.
+     * @param robot_configuration robot generalized coordinates configuration.
+     * @param robot_velocity robot generalized coordinates velocity.
+    */
+    void compute_relative_velocity_between_frames(pinocchio::Data& pinocchio_data,
+                                                  Eigen::Ref<const Eigen::VectorXd> &robot_configration,
+                                                  Eigen::Ref<const Eigen::VectorXd> &robot_velocity);
+
 private:  // attributes
     /** @brief Rigid body dynamics model. */
     pinocchio::Model pinocchio_model_;
