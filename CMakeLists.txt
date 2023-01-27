@@ -32,6 +32,7 @@ search_for_boost_python()
 # Optionnal
 find_package(dynamic-graph QUIET)
 find_package(dynamic-graph-python QUIET)
+find_package(ament_cmake QUIET)
 
 set(build_dynamic_graph_plugins FALSE)
 if(${dynamic-graph_FOUND} AND ${dynamic-graph-python_FOUND})
@@ -98,6 +99,14 @@ if(${build_dynamic_graph_plugins})
 endif()
 
 #
+# Allow other ROS packages to link to this package during compilation
+#
+if (ament_cmake_FOUND)
+  ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+  ament_export_dependencies(yaml_utils)
+endif()
+
+#
 # Install the package
 #
 
@@ -154,3 +163,11 @@ add_documentation()
 # create the cmake package
 #
 generate_cmake_package(INSTALL_EXPORT)
+
+#
+# Allow other ROS 2 packages to find the header files
+#
+if (ament_cmake_FOUND)
+  ament_export_include_directories(include)
+  ament_package()
+endif()

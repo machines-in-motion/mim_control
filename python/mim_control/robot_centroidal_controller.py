@@ -1,10 +1,3 @@
-##################################################################################################################
-## This file is the centroidal controller
-#################################################################################################################
-## Author: Avadesh Meduri & Julian Viereck
-## Date: 9/12/2020
-#################################################################################################################
-
 import numpy as np
 import pinocchio as pin
 
@@ -21,15 +14,15 @@ def mat(a):
 
 class RobotCentroidalController:
     def __init__(
-        self,
-        robot_config,
-        mu,
-        kc,
-        dc,
-        kb,
-        db,
-        qp_penalty_lin=3 * [1e6],
-        qp_penalty_ang=3 * [1e6],
+            self,
+            robot_config,
+            mu,
+            kc,
+            dc,
+            kb,
+            db,
+            qp_penalty_lin=3 * [1e6],
+            qp_penalty_ang=3 * [1e6],
     ):
         """
         Input:
@@ -70,7 +63,8 @@ class RobotCentroidalController:
         vcom = np.reshape(np.array(dq[0:3]), (3,))
         Ib = robot.mass(q)[3:6, 3:6]
 
-        quat_diff = self.quaternion_difference(arr(q[3:7]), arr(des_ori))
+        tmp =  pin.Quaternion(des_ori[3], des_ori[0], des_ori[1], des_ori[2]) * pin.Quaternion(q[6], q[3], q[4], q[5]).conjugate()
+        quat_diff = pin.log3(tmp.toRotationMatrix())
 
         cur_angvel = arr(dq[3:6])
 
@@ -93,7 +87,7 @@ class RobotCentroidalController:
                 arr(
                     arr(np.multiply(self.kb, quat_diff))
                     + (
-                        Ib * mat(np.multiply(self.db, des_angvel - cur_angvel))
+                            Ib * mat(np.multiply(self.db, des_angvel - cur_angvel))
                     ).T
                 ),
             ]
@@ -120,7 +114,9 @@ class RobotCentroidalController:
         robot = self.pin_robot_wrapper
         com = np.reshape(np.array(q[0:3]), (3,))
         robot.framesForwardKinematics(q)
+
         r = [robot.data.oMf[i].translation - com for i in self.eff_ids]
+
         nb_ee = self.robot_config.nb_ee
         # Use the contact activation from the plan to determine which of the
         # forces should be active.
@@ -142,8 +138,8 @@ class RobotCentroidalController:
             if cnt_array[i] == 0:
                 continue
 
-            A[:3, 3 * j : 3 * (j + 1)] = np.eye(3)
-            A[3:, 3 * j : 3 * (j + 1)] = pin.skew(r[i])
+            A[:3, 3 * j: 3 * (j + 1)] = np.eye(3)
+            A[3:, 3 * j: 3 * (j + 1)] = pin.skew(r[i])
 
             G[5 * j + 0, 3 * j + 0] = 1  # mu Fz - Fx >= 0
             G[5 * j + 0, 3 * j + 2] = -self.mu
@@ -166,7 +162,7 @@ class RobotCentroidalController:
         for i in range(len(cnt_array)):
             if cnt_array[i] == 0:
                 continue
-            F[3 * i : 3 * (i + 1)] = solx[3 * j : 3 * (j + 1)]
+            F[3 * i: 3 * (i + 1)] = solx[3 * j: 3 * (j + 1)]
             j += 1
 
         return F
@@ -182,9 +178,9 @@ class RobotCentroidalController:
     def quaternion_to_rotation(self, q):
         """ converts quaternion to rotation matrix """
         return (
-            (q[3] ** 2 - q[:3].dot(q[:3])) * np.eye(3)
-            + 2.0 * np.outer(q[:3], q[:3])
-            + 2.0 * q[3] * self.skew(q[:3])
+                (q[3] ** 2 - q[:3].dot(q[:3])) * np.eye(3)
+                + 2.0 * np.outer(q[:3], q[:3])
+                + 2.0 * q[3] * self.skew(q[:3])
         )
 
     def exp_quaternion(self, w):
