@@ -3,9 +3,8 @@
 <package format="3">
     <name>mim_control</name>
     <version>0.0.0</version>
-    <description>TODO: Package description</description>
-    <maintainer email="user@todo.todo">user</maintainer>
-    <license>TODO: License declaration</license>
+    <description>Generic controllers for legged robots</description>
+    <maintainer email="stanley.wu@mail.mcgill.ca">Stanley Wu</maintainer><!-- Maintainer for anything related to ROS -->
 
     <buildtool_depend>ament_cmake</buildtool_depend>
     <depend>mpi_cmake_modules</depend>
