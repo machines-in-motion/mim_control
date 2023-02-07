@@ -283,4 +283,4 @@ namespace mim_control
         relative_vel_between_frames = vel_end_in_world_frame - vel_root_in_world_frame;
     }
 
-}  // namespace mim_control_
+}  // namespace mim_control
