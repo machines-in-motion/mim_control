@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2020, New York University and Max Planck
  * Gesellschaft
  *
- * @brief This is the implementation for mim_control_ controller between any two
+ * @brief This is the implementation for impedance controller between any two
  * frames of the robot.
  *
  */
@@ -116,21 +116,21 @@ namespace mim_control
                                   const pinocchio::Force& feed_forward_force);
 
         /**
-         * @brief Get the computed torques from the mim_control_ controller.
+         * @brief Get the computed torques from the impedance controller.
          *
          * @return Eigen::VectorXd&
          */
         const Eigen::VectorXd& get_torques();
 
         /**
-         * @brief Get the computed joint torques from the mim_control_ controller.
+         * @brief Get the computed joint torques from the impedance controller.
          *
          * @return Eigen::VectorXd&
          */
         const Eigen::VectorXd& get_joint_torques();
 
         /**
-         * @brief Get the mim_control_ force \f$ f_i \f$ with \f$ \tau = J^T f_i \f$.
+         * @brief Get the impedance force \f$ f_i \f$ with \f$ \tau = J^T f_i \f$.
          *
          * @return Vector6d&
          */
@@ -187,7 +187,7 @@ namespace mim_control
         /** @brief Cache of the rigid body dynamics algorithms. */
         pinocchio::Data pinocchio_data_;
 
-        /** @brief (urdf) name of the root frame. The mim_control_ controller is
+        /** @brief (urdf) name of the root frame. The impedance controller is
          * computed with respect to this frame. */
         std::string root_frame_name_;
 
@@ -236,7 +236,7 @@ namespace mim_control
         /** @brief SE3 velocity error. */
         pinocchio::Motion err_vel_;
 
-        /** @brief Jacobian used in the computation of the mim_control_. */
+        /** @brief Jacobian used in the computation of the impedance. */
         pinocchio::Data::Matrix6x impedance_jacobian_;
 
         /** @brief Output torques. */
@@ -258,4 +258,4 @@ namespace mim_control
         Eigen::VectorXd relative_vel_between_frames;
     };
 
-}  // namespace mim_control_
+}  // namespace impedance
