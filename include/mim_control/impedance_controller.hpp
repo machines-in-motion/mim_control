@@ -258,4 +258,4 @@ namespace mim_control
         Eigen::VectorXd relative_vel_between_frames;
     };
 
-}  // namespace impedance
+}  // namespace mim_control

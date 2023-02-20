@@ -1,3 +1,10 @@
+##################################################################################################################
+## This file is the centroidal controller
+#################################################################################################################
+## Author: Avadesh Meduri & Julian Viereck
+## Date: 9/12/2020
+#################################################################################################################
+
 import numpy as np
 import pinocchio as pin
 
@@ -63,8 +70,7 @@ class RobotCentroidalController:
         vcom = np.reshape(np.array(dq[0:3]), (3,))
         Ib = robot.mass(q)[3:6, 3:6]
 
-        tmp =  pin.Quaternion(des_ori[3], des_ori[0], des_ori[1], des_ori[2]) * pin.Quaternion(q[6], q[3], q[4], q[5]).conjugate()
-        quat_diff = pin.log3(tmp.toRotationMatrix())
+        quat_diff = self.quaternion_difference(des_ori, q)
 
         cur_angvel = arr(dq[3:6])
 
@@ -221,13 +227,7 @@ class RobotCentroidalController:
         return self.quaternion_product(dq, q)
 
     def quaternion_difference(self, q1, q2):
-        """computes the tangent vector from q1 to q2 at Identity
-        returns vecotr w
-        s.t. q2 = exp(.5 * w)*q1
-        """
-        # first compute dq s.t.  q2 = q1*dq
-        q1conjugate = np.array([-q1[0], -q1[1], -q1[2], q1[3]])
-        # order of multiplication is very essential here
-        dq = self.quaternion_product(q2, q1conjugate)
-        # increment is log of dq
-        return self.log_quaternion(dq)
+        """computes the difference between 2 quaternions, q1 and q2 """
+        tmp =  pin.Quaternion(q1[3], q1[0], q1[1], q1[2]) * pin.Quaternion(q2[6], q2[3], q2[4], q2[5]).conjugate()
+        quat_diff = pin.log3(tmp.toRotationMatrix())
+        return quat_diff
