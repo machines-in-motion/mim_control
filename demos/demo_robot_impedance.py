@@ -12,6 +12,7 @@ import numpy as np
 from mim_control.robot_impedance_controller import RobotImpedanceController
 from bullet_utils.env import BulletEnvWithGround
 from robot_properties_solo.solo12wrapper import Solo12Robot, Solo12Config
+from robot_properties_go1.go1wrapper import Go1Robot, Go1Config
 from robot_properties_bolt.bolt_wrapper import BoltRobot, BoltConfig
 
 
@@ -29,6 +30,10 @@ def demo(robot_name):
         robot = BoltRobot()
         robot = env.add_robot(robot)
         robot_config = BoltConfig()
+    elif robot_name == "go1":
+        robot = Go1Robot()
+        robot = env.add_robot(robot)
+        robot_config = Go1Config()
     else:
         raise RuntimeError(
             "Robot name [" + str(robot_name) + "] unknown. "
@@ -83,11 +88,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "--bolt", help="Demonstrate Bolt.", action="store_true"
     )
+    parser.add_argument(
+        "--go1", help="Demonstrate Bolt.", action="store_true"
+    )
     args = parser.parse_args()
     if args.solo:
         robot_name = "solo"
     elif args.bolt:
         robot_name = "bolt"
+    elif args.go1:
+        robot_name = "go1"
     else:
         robot_name = "solo"
 

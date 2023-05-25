@@ -14,6 +14,7 @@ This packages contains generic controllers that can be used for a biped, quadrup
 - BulletUtils (Optional, needed to run demos)
 - Robot_Properties_Solo (Optional, needed to run demos)
 - Robot_Properties_Bolt (Optional, needed to run demos)
+- Robot_Properties_Go1 (Optional, needed to run demos)
 ```
 #### Download the package
 
