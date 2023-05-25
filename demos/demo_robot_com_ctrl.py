@@ -60,7 +60,7 @@ def demo(robot_name):
     else:
         raise RuntimeError(
             "Robot name [" + str(robot_name) + "] unknown. "
-            "Try 'solo' or 'bolt'"
+            "Try 'solo', 'bolt' or 'go1'"
         )
 
     # Initialize control
@@ -73,7 +73,6 @@ def demo(robot_name):
     robot.reset_state(q0, dq0)
 
     # Desired center of mass position and velocity.
-    # x_com = [0.0, 0.0, 0.18]
     xd_com = [0.0, 0.0, 0.0]
     # The base should be flat.
     x_ori = [0.0, 0.0, 0.0, 1.0]
