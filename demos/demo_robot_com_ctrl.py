@@ -12,6 +12,7 @@ from mim_control.robot_impedance_controller import RobotImpedanceController
 from mim_control.robot_centroidal_controller import RobotCentroidalController
 from bullet_utils.env import BulletEnvWithGround
 from robot_properties_solo.solo12wrapper import Solo12Robot, Solo12Config
+from robot_properties_go1.go1wrapper import Go1Robot, Go1Config
 from robot_properties_bolt.bolt_wrapper import BoltRobot, BoltConfig
 
 
@@ -32,6 +33,19 @@ def demo(robot_name):
         db = [1.0, 1.0, 1.0]
         qp_penalty_lin = 3 * [1e6]
         qp_penalty_ang = 3 * [1e6]
+        x_com = [0.0, 0.0, 0.18]
+    elif robot_name == "go1":
+        robot = Go1Robot()
+        robot = env.add_robot(robot)
+        robot_config = Go1Config()
+        mu = 0.2
+        kc=[0, 0, 200]
+        dc=[10, 10, 10]
+        kb=[25, 25, 25.]
+        db=[22.5, 22.5, 22.5]
+        qp_penalty_lin = 3 * [1e6]
+        qp_penalty_ang = 3 * [1e6]
+        x_com = [0.0, 0.0, 0.35]
     elif robot_name == "bolt":
         robot = env.add_robot(BoltRobot)
         robot_config = BoltConfig()
@@ -42,6 +56,7 @@ def demo(robot_name):
         db = [10.0, 10.0, 10.0]
         qp_penalty_lin = [1, 1, 1e6]
         qp_penalty_ang = [1e6, 1e6, 1]
+        x_com = [0.0, 0.0, 0.18]
     else:
         raise RuntimeError(
             "Robot name [" + str(robot_name) + "] unknown. "
@@ -58,7 +73,7 @@ def demo(robot_name):
     robot.reset_state(q0, dq0)
 
     # Desired center of mass position and velocity.
-    x_com = [0.0, 0.0, 0.18]
+    # x_com = [0.0, 0.0, 0.18]
     xd_com = [0.0, 0.0, 0.0]
     # The base should be flat.
     x_ori = [0.0, 0.0, 0.0, 1.0]
@@ -116,9 +131,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--bolt", help="Demonstrate Bolt.", action="store_true"
     )
+    parser.add_argument(
+        "--go1", help="Demonstrate Go1.", action="store_true"
+    )
     args = parser.parse_args()
     if args.solo:
         robot_name = "solo"
+    elif args.go1:
+        robot_name = "go1"
     elif args.bolt:
         robot_name = "bolt"
     else:
